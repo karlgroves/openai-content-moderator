@@ -51,9 +51,8 @@ Analyzes text content for potentially harmful content using OpenAI's moderation 
 ```
 
 **Headers:**
-```
-Content-Type: application/json
-```
+
+`Content-Type: application/json`
 
 **Response (200 OK):**
 
@@ -293,7 +292,7 @@ Configure the application using environment variables in your `.env` file:
 | `NODE_ENV` | No | `development` | Environment (development/production) |
 | `CORS_ORIGIN` | No | `*` | CORS allowed origins |
 
-### Example `.env` file:
+### Example `.env` file
 
 ```bash
 # Required
@@ -353,6 +352,7 @@ The API provides consistent error responses with detailed information:
 ### Common Error Scenarios
 
 **Missing Text:**
+
 ```json
 {
   "error": "ValidationError",
@@ -362,6 +362,7 @@ The API provides consistent error responses with detailed information:
 ```
 
 **Invalid API Key:**
+
 ```json
 {
   "error": "AuthenticationError",
@@ -370,6 +371,7 @@ The API provides consistent error responses with detailed information:
 ```
 
 **Rate Limit:**
+
 ```json
 {
   "error": "RateLimitError",
@@ -382,6 +384,7 @@ The API provides consistent error responses with detailed information:
 ### Traditional Server Deployment
 
 1. **Using PM2:**
+
    ```bash
    npm install -g pm2
    pm2 start index.js --name content-moderator
@@ -390,6 +393,7 @@ The API provides consistent error responses with detailed information:
    ```
 
 2. **Using Docker:**
+
    ```bash
    docker build -t content-moderator .
    docker run -p 8000:8000 --env-file .env content-moderator
@@ -400,6 +404,7 @@ The API provides consistent error responses with detailed information:
 This project includes AWS Lambda support. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 
 Quick deployment:
+
 ```bash
 npm install
 npm run deploy

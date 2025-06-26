@@ -2,9 +2,7 @@
 
 ## Base URL
 
-```
-http://localhost:8000
-```
+<http://localhost:8000>
 
 For production deployments, replace with your actual domain.
 
@@ -16,9 +14,7 @@ Currently, the API does not require authentication for clients. The service auth
 
 All requests and responses use JSON:
 
-```
-Content-Type: application/json
-```
+`Content-Type: application/json`
 
 ## Endpoints
 

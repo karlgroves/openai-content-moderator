@@ -225,20 +225,24 @@ Be aware of these limitations:
 
 ### Common Issues
 
-**1. "Text is required" error**
+#### 1. "Text is required" error
+
 - Ensure you're sending a JSON body with a "text" field
 - Check Content-Type header is set to "application/json"
 
-**2. "Text too long" error**
+#### 2. "Text too long" error
+
 - Text exceeds 32,768 characters
 - Split long text into smaller chunks
 
-**3. Empty response**
+#### 3. Empty response
+
 - Check the API endpoint URL
 - Verify network connectivity
 - Check for proxy or firewall issues
 
-**4. Slow responses**
+#### 4. Slow responses
+
 - Normal response time is 1-3 seconds
 - Consider implementing timeouts
 - Check network latency
