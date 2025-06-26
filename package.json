@@ -10,7 +10,11 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:unit": "jest tests/unit",
-    "test:integration": "jest tests/integration"
+    "test:integration": "jest tests/integration",
+    "deploy": "serverless deploy",
+    "deploy:prod": "serverless deploy --stage prod",
+    "offline": "serverless offline",
+    "remove": "serverless remove"
   },
   "keywords": [],
   "author": "",
@@ -20,12 +24,16 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "openai": "^4.77.0"
+    "openai": "^4.77.0",
+    "serverless-http": "^3.2.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "jest": "^30.0.2",
     "nock": "^14.0.5",
+    "serverless": "^3.38.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^13.3.3",
     "supertest": "^7.1.1"
   }
 }
