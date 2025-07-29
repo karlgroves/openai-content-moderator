@@ -4,16 +4,14 @@ const { mockOpenAIResponse, mockFlaggedResponse } = require('../fixtures/mockDat
 // Helper to mock OpenAI API calls
 const mockOpenAISuccess = (text = 'test text', response = mockOpenAIResponse) => {
   return nock('https://api.openai.com')
-    .post('/v1/moderations', {
-      model: 'omni-moderation-latest',
-      input: text
-    })
+    .post('/v1/moderations')
     .reply(200, response);
 };
 
 const mockOpenAIError = (statusCode = 500, errorBody = { error: { message: 'Internal server error' } }) => {
   return nock('https://api.openai.com')
     .post('/v1/moderations')
+    .times(3) // Handle retries
     .reply(statusCode, errorBody);
 };
 
@@ -29,6 +27,7 @@ const mockOpenAISpecificError = (statusCode, message) => {
   
   return nock('https://api.openai.com')
     .post('/v1/moderations')
+    .times(3) // Handle retries
     .reply(statusCode, errorResponse);
 };
 

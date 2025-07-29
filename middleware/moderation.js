@@ -49,7 +49,7 @@ const moderateContent = async (req, res, next) => {
     // Generic error response
     res.status(500).json({ 
       error: "Failed to process moderation request",
-      message: error.message || "An unexpected error occurred"
+      message: error.error?.message || error.message || "An unexpected error occurred"
     });
   }
 };

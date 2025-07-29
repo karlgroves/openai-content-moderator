@@ -1,7 +1,10 @@
+const nock = require('nock');
 const { moderateContent } = require('../../middleware/moderation');
 const { 
   mockOpenAISuccess, 
   mockOpenAIFlagged,
+  mockOpenAIError,
+  mockOpenAISpecificError,
   createMockReq, 
   createMockRes, 
   createMockNext,
@@ -13,9 +16,17 @@ describe('Moderation Middleware - Core Functionality', () => {
   let req, res, next;
 
   beforeEach(() => {
+    // Set up environment for OpenAI
+    process.env.OPENAI_API_KEY = 'test-api-key';
+    
     req = createMockReq();
     res = createMockRes();
     next = createMockNext();
+  });
+
+  afterEach(() => {
+    // Clean up nock mocks
+    nock.cleanAll();
   });
 
   describe('moderateContent', () => {
@@ -104,6 +115,74 @@ describe('Moderation Middleware - Core Functionality', () => {
 
       expect(scope.isDone()).toBe(true);
       expect(req.moderationMetadata.model).toBe('omni-moderation-latest');
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle 429 rate limit errors', async () => {
+      const testText = 'Test text';
+      req.body = { text: testText };
+      
+      const scope = mockOpenAIError(429, { error: { message: 'Rate limit exceeded' } });
+
+      await moderateContent(req, res, next);
+
+      expect(scope.isDone()).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(429);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Rate limit exceeded. Please try again later.'
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should handle 503 service unavailable errors', async () => {
+      const testText = 'Test text';
+      req.body = { text: testText };
+      
+      const scope = mockOpenAIError(503, { error: { message: 'Service unavailable' } });
+
+      await moderateContent(req, res, next);
+
+      expect(scope.isDone()).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(503);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'OpenAI service is temporarily unavailable. Please try again later.'
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should handle generic errors with message', async () => {
+      const testText = 'Test text';
+      req.body = { text: testText };
+      
+      const scope = mockOpenAIError(500, { error: { message: 'Custom error message' } });
+
+      await moderateContent(req, res, next);
+
+      expect(scope.isDone()).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to process moderation request',
+        message: 'Custom error message'
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should handle generic errors without message', async () => {
+      const testText = 'Test text';
+      req.body = { text: testText };
+      
+      const scope = mockOpenAIError(500, {});
+
+      await moderateContent(req, res, next);
+
+      expect(scope.isDone()).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to process moderation request',
+        message: '500 status code (no body)'
+      });
+      expect(next).not.toHaveBeenCalled();
     });
   });
 });
