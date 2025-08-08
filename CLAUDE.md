@@ -2,6 +2,43 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Flow Branching Strategy
+
+This project follows Git Flow branching strategy. All development work must adhere to these guidelines:
+
+### Branch Structure
+- **main** - Production-ready code only. Direct commits are not allowed.
+- **develop** - Integration branch for features. All feature branches merge here first.
+- **feature/** - New features (branch from develop, merge back to develop)
+- **release/** - Release preparation (branch from develop, merge to both main and develop)
+- **hotfix/** - Emergency fixes (branch from main, merge to both main and develop)
+
+### Workflow Rules
+1. **Never commit directly to main** - All changes must come through proper Git Flow branches
+2. **Feature development** - Create feature branches from develop: `git checkout -b feature/feature-name develop`
+3. **Completing features** - Merge completed features back to develop via pull request
+4. **Releases** - Create release branches from develop when ready for production
+5. **Hotfixes** - Only for critical production issues, branch from main
+
+### Common Commands
+```bash
+# Start a new feature
+git checkout develop
+git pull origin develop
+git checkout -b feature/new-feature
+
+# Finish a feature (via PR preferred)
+git checkout develop
+git merge --no-ff feature/new-feature
+git push origin develop
+
+# Start a release
+git checkout -b release/1.0.0 develop
+
+# Start a hotfix
+git checkout -b hotfix/critical-fix main
+```
+
 ## Project Overview
 
 This is a middleware-based REST API for content moderation using OpenAI's moderation API. It provides a clean, validated interface for text moderation with comprehensive error handling.
