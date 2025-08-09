@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    # Allow both direct and indirect updates
+    allow:
+      - dependency-type: "all"
+    # Limit the number of open pull requests for version updates
+    open-pull-requests-limit: 5
+    # Reviewers and assignees for Dependabot PRs
+    reviewers:
+      - "karlgroves"
+    assignees:
+      - "karlgroves"
+    # Group all patch updates into a single PR
+    groups:
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      minor-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+    # Ignore specific packages if needed
+    ignore:
+      # Ignore major version updates for now
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
