@@ -12,7 +12,15 @@
       "Bash(npm run test:coverage:*)",
       "Bash(npm test)",
       "Bash(npm run test:integration:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(mkdir:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh api:*)",
+      "Bash(npm audit:*)",
+      "Bash(git pull:*)",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }
