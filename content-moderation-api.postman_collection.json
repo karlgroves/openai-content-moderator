@@ -1,0 +1,475 @@
+{
+  "info": {
+    "name": "Content Moderation API",
+    "description": "A middleware-based REST API for content moderation using OpenAI's moderation API and Google Perspective API",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "Base URL for the API"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the API service is healthy and running"
+      },
+      "response": [
+        {
+          "name": "Health Check - Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2024-01-01T12:00:00.000Z\",\n  \"service\": \"openai-content-moderator\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Available Models",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/moderation/models",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "moderation", "models"]
+        },
+        "description": "Get list of available moderation models"
+      },
+      "response": [
+        {
+          "name": "Available Models - Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/models",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "models"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"models\": [\n    {\n      \"id\": \"omni-moderation-latest\",\n      \"name\": \"Omni Moderation Latest\",\n      \"description\": \"Latest OpenAI moderation model\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Moderate Text Content",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"This is a sample text to moderate\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/moderation/text",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "moderation", "text"]
+        },
+        "description": "Moderate text content using OpenAI and optionally Google Perspective API"
+      },
+      "response": [
+        {
+          "name": "Moderate Text - Success (Clean Content)",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"This is a sample text to moderate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"flagged\": false,\n  \"services\": {\n    \"openai\": {\n      \"results\": {\n        \"flagged\": false,\n        \"categories\": {\n          \"harassment\": false,\n          \"harassment/threatening\": false,\n          \"hate\": false,\n          \"hate/threatening\": false,\n          \"self-harm\": false,\n          \"self-harm/instructions\": false,\n          \"self-harm/intent\": false,\n          \"sexual\": false,\n          \"sexual/minors\": false,\n          \"violence\": false,\n          \"violence/graphic\": false\n        },\n        \"category_scores\": {\n          \"harassment\": 0.000123,\n          \"harassment/threatening\": 0.000045,\n          \"hate\": 0.000067,\n          \"hate/threatening\": 0.000012,\n          \"self-harm\": 0.000034,\n          \"self-harm/instructions\": 0.000023,\n          \"self-harm/intent\": 0.000018,\n          \"sexual\": 0.000089,\n          \"sexual/minors\": 0.000011,\n          \"violence\": 0.000056,\n          \"violence/graphic\": 0.000029\n        }\n      },\n      \"metadata\": {\n        \"model\": \"omni-moderation-latest\",\n        \"timestamp\": \"2024-01-01T12:00:00.000Z\"\n      }\n    }\n  },\n  \"metadata\": {\n    \"timestamp\": \"2024-01-01T12:00:00.000Z\",\n    \"textLength\": 33,\n    \"servicesUsed\": [\"openai\"]\n  }\n}"
+        },
+        {
+          "name": "Moderate Text - Flagged Content",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"This content contains inappropriate language\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"flagged\": true,\n  \"services\": {\n    \"openai\": {\n      \"results\": {\n        \"flagged\": true,\n        \"categories\": {\n          \"harassment\": true,\n          \"harassment/threatening\": false,\n          \"hate\": false,\n          \"hate/threatening\": false,\n          \"self-harm\": false,\n          \"self-harm/instructions\": false,\n          \"self-harm/intent\": false,\n          \"sexual\": false,\n          \"sexual/minors\": false,\n          \"violence\": false,\n          \"violence/graphic\": false\n        },\n        \"category_scores\": {\n          \"harassment\": 0.8234,\n          \"harassment/threatening\": 0.0012,\n          \"hate\": 0.0045,\n          \"hate/threatening\": 0.0001,\n          \"self-harm\": 0.0002,\n          \"self-harm/instructions\": 0.0001,\n          \"self-harm/intent\": 0.0001,\n          \"sexual\": 0.0034,\n          \"sexual/minors\": 0.0001,\n          \"violence\": 0.0056,\n          \"violence/graphic\": 0.0012\n        }\n      },\n      \"metadata\": {\n        \"model\": \"omni-moderation-latest\",\n        \"timestamp\": \"2024-01-01T12:00:00.000Z\"\n      }\n    }\n  },\n  \"metadata\": {\n    \"timestamp\": \"2024-01-01T12:00:00.000Z\",\n    \"textLength\": 45,\n    \"servicesUsed\": [\"openai\"]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Legacy Moderate Endpoint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"This is a test using the legacy endpoint\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/moderate",
+          "host": ["{{baseUrl}}"],
+          "path": ["moderate"]
+        },
+        "description": "Legacy endpoint that redirects to /api/moderation/text for backward compatibility"
+      }
+    },
+    {
+      "name": "Error Examples",
+      "item": [
+        {
+          "name": "Missing Text Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This should fail because 'text' field is missing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            },
+            "description": "Test validation error when text field is missing"
+          },
+          "response": [
+            {
+              "name": "Missing Text - Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"This should fail because 'text' field is missing\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/moderation/text",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "moderation", "text"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Text content is required for moderation.\",\n  \"field\": \"text\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Empty Text Field",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            },
+            "description": "Test validation error when text field is empty"
+          },
+          "response": [
+            {
+              "name": "Empty Text - Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"text\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/moderation/text",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "moderation", "text"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Text content cannot be empty.\",\n  \"field\": \"text\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Invalid Text Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": 123\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            },
+            "description": "Test validation error when text is not a string"
+          },
+          "response": [
+            {
+              "name": "Invalid Text Type - Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"text\": 123\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/moderation/text",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "moderation", "text"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Text must be a string.\",\n  \"field\": \"text\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Text Too Long",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"{{ 'a'.repeat(33000) }}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/moderation/text",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "moderation", "text"]
+            },
+            "description": "Test validation error when text exceeds 32,768 character limit"
+          },
+          "response": [
+            {
+              "name": "Text Too Long - Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"text\": \"Very long text that exceeds the limit...\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/moderation/text",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "moderation", "text"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Text content exceeds maximum length of 32,768 characters.\",\n  \"field\": \"text\",\n  \"maxLength\": 32768,\n  \"currentLength\": 33000\n}"
+            }
+          ]
+        },
+        {
+          "name": "404 Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nonexistent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nonexistent"]
+            },
+            "description": "Test 404 error for non-existent endpoints"
+          },
+          "response": [
+            {
+              "name": "404 Not Found - Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/nonexistent",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "nonexistent"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Not found\",\n  \"message\": \"The requested endpoint /api/nonexistent does not exist\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Collection of requests that demonstrate various error scenarios and validation failures"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set timestamp for requests",
+          "pm.globals.set('timestamp', new Date().toISOString());"
+        ]
+      }
+    }
+  ]
+}
