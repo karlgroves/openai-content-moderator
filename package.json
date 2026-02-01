@@ -14,7 +14,12 @@
     "deploy": "serverless deploy",
     "deploy:prod": "serverless deploy --stage prod",
     "offline": "serverless offline",
-    "remove": "serverless remove"
+    "remove": "serverless remove",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:first": "standard-version --first-release"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +39,7 @@
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.3.3",
+    "standard-version": "^9.5.0",
     "supertest": "^7.1.1"
   }
 }
