@@ -32,25 +32,25 @@ describe('Index.js - Server Configuration Tests', () => {
     });
 
     // Health check endpoint
-    app.get("/health", (req, res) => {
-      res.json({ 
-        status: "healthy",
+    app.get('/health', (req, res) => {
+      res.json({
+        status: 'healthy',
         timestamp: new Date().toISOString(),
-        service: "openai-content-moderator"
+        service: 'openai-content-moderator',
       });
     });
 
     // Legacy endpoint for backward compatibility
-    app.post("/moderate", (req, res) => {
+    app.post('/moderate', (req, res) => {
       // For testing, just return a simple response
       res.json({ legacy: true, redirected: true });
     });
 
     // 404 handler
     app.use((req, res) => {
-      res.status(404).json({ 
-        error: "Not found",
-        message: `The requested endpoint ${req.path} does not exist`
+      res.status(404).json({
+        error: 'Not found',
+        message: `The requested endpoint ${req.path} does not exist`,
       });
     });
 
@@ -62,9 +62,7 @@ describe('Index.js - Server Configuration Tests', () => {
 
   describe('Health Check Endpoint', () => {
     test('should return health status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toHaveProperty('status', 'healthy');
       expect(response.body).toHaveProperty('timestamp');
@@ -75,10 +73,7 @@ describe('Index.js - Server Configuration Tests', () => {
 
   describe('Legacy Endpoint', () => {
     test('should handle legacy /moderate endpoint', async () => {
-      const response = await request(app)
-        .post('/moderate')
-        .send({ text: 'test' })
-        .expect(200);
+      const response = await request(app).post('/moderate').send({ text: 'test' }).expect(200);
 
       expect(response.body).toHaveProperty('legacy', true);
       expect(response.body).toHaveProperty('redirected', true);
@@ -87,9 +82,7 @@ describe('Index.js - Server Configuration Tests', () => {
 
   describe('404 Handler', () => {
     test('should return 404 for non-existent endpoints', async () => {
-      const response = await request(app)
-        .get('/non-existent-endpoint')
-        .expect(404);
+      const response = await request(app).get('/non-existent-endpoint').expect(404);
 
       expect(response.body).toHaveProperty('error', 'Not found');
       expect(response.body).toHaveProperty('message');
@@ -97,9 +90,7 @@ describe('Index.js - Server Configuration Tests', () => {
     });
 
     test('should return 404 for non-existent POST endpoints', async () => {
-      const response = await request(app)
-        .post('/non-existent-endpoint')
-        .expect(404);
+      const response = await request(app).post('/non-existent-endpoint').expect(404);
 
       expect(response.body).toHaveProperty('error', 'Not found');
       expect(response.body).toHaveProperty('message');
@@ -109,9 +100,7 @@ describe('Index.js - Server Configuration Tests', () => {
 
   describe('Request Logging Middleware', () => {
     test('should log requests', async () => {
-      await request(app)
-        .get('/health')
-        .expect(200);
+      await request(app).get('/health').expect(200);
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z - GET \/health/)
@@ -121,9 +110,7 @@ describe('Index.js - Server Configuration Tests', () => {
 
   describe('Middleware Setup', () => {
     test('should have CORS enabled', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.headers['access-control-allow-origin']).toBe('*');
     });
@@ -154,7 +141,7 @@ describe('Index.js - Server Configuration Tests', () => {
       const testApp = express();
       testApp.use(cors());
       testApp.use(bodyParser.json());
-      
+
       // Add a route that throws an error for testing
       testApp.get('/error-test', (req, res, next) => {
         const error = new Error('Test error');
@@ -166,9 +153,7 @@ describe('Index.js - Server Configuration Tests', () => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
 
-      const response = await request(testApp)
-        .get('/error-test')
-        .expect(500);
+      const response = await request(testApp).get('/error-test').expect(500);
 
       expect(response.body).toHaveProperty('error', 'Internal Server Error');
     });

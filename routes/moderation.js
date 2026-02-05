@@ -6,7 +6,8 @@ const { moderateWithPerspective } = require('../middleware/perspective');
 const { asyncHandler } = require('../middleware/errorHandler');
 
 // POST /api/moderation/text - Moderate text content
-router.post('/text', 
+router.post(
+  '/text',
   validateModerationRequest,
   asyncHandler(moderateWithPerspective),
   asyncHandler(moderateContent),
@@ -15,21 +16,22 @@ router.post('/text',
     const combinedResults = {
       openai: {
         results: req.moderationResults,
-        metadata: req.moderationMetadata
-      }
+        metadata: req.moderationMetadata,
+      },
     };
 
     // Add Perspective results if available
     if (req.perspectiveResults) {
       combinedResults.perspective = {
         results: req.perspectiveResults,
-        metadata: req.perspectiveMetadata
+        metadata: req.perspectiveMetadata,
       };
     }
 
     // Create overall flagged status (flagged if either API flags content)
-    const overallFlagged = req.moderationResults.flagged || 
-                          (req.perspectiveResults ? req.perspectiveResults.flagged : false);
+    const overallFlagged =
+      req.moderationResults.flagged ||
+      (req.perspectiveResults ? req.perspectiveResults.flagged : false);
 
     const response = {
       flagged: overallFlagged,
@@ -37,8 +39,8 @@ router.post('/text',
       metadata: {
         timestamp: new Date().toISOString(),
         textLength: req.body.text.length,
-        servicesUsed: req.perspectiveResults ? ['openai', 'perspective'] : ['openai']
-      }
+        servicesUsed: req.perspectiveResults ? ['openai', 'perspective'] : ['openai'],
+      },
     };
     res.json(response);
   }
@@ -49,11 +51,11 @@ router.get('/models', (req, res) => {
   res.json({
     models: [
       {
-        id: "omni-moderation-latest",
-        name: "Omni Moderation Latest",
-        description: "Latest OpenAI moderation model"
-      }
-    ]
+        id: 'omni-moderation-latest',
+        name: 'Omni Moderation Latest',
+        description: 'Latest OpenAI moderation model',
+      },
+    ],
   });
 });
 

@@ -53,7 +53,7 @@ describe('Validation Middleware', () => {
         expect(res.json).toHaveBeenCalledWith(
           expect.objectContaining({
             error: expectedError,
-            field: 'text'
+            field: 'text',
           })
         );
         expect(next).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('Validation Middleware', () => {
         error: 'Text content exceeds maximum length of 32,768 characters.',
         field: 'text',
         maxLength: 32768,
-        currentLength: 32769
+        currentLength: 32769,
       });
       expect(next).not.toHaveBeenCalled();
     });
