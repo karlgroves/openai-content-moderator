@@ -68,7 +68,7 @@ npm run test:watch
 **Test Structure:**
 
 - Unit tests: `tests/unit/` - Tests individual middleware functions
-- Integration tests: `tests/integration/` - Tests full API endpoints  
+- Integration tests: `tests/integration/` - Tests full API endpoints
 - Test fixtures: `tests/fixtures/` - Mock data and responses
 - Test helpers: `tests/helpers/` - Utilities for mocking OpenAI API
 

@@ -12,5 +12,5 @@ module.exports.handler = serverless(app, {
     // Add custom headers if needed
     response.headers = response.headers || {};
     response.headers['X-Request-Id'] = context.awsRequestId;
-  }
+  },
 });

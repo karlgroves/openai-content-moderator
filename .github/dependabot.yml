@@ -1,36 +1,37 @@
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: "npm"
-    directory: "/"
+  # npm dependencies
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-    # Allow both direct and indirect updates
-    allow:
-      - dependency-type: "all"
-    # Limit the number of open pull requests for version updates
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'America/New_York'
     open-pull-requests-limit: 5
-    # Reviewers and assignees for Dependabot PRs
-    reviewers:
-      - "karlgroves"
     assignees:
-      - "karlgroves"
-    # Group all patch updates into a single PR
+      - 'karlgroves'
     groups:
-      patch-updates:
+      minor-and-patch:
         patterns:
-          - "*"
+          - '*'
         update-types:
-          - "patch"
-      minor-updates:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-    # Ignore specific packages if needed
-    ignore:
-      # Ignore major version updates for now
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+          - 'minor'
+          - 'patch'
+    labels:
+      - 'dependencies'
+      - 'automated'
+    commit-message:
+      prefix: 'chore(deps)'
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    labels:
+      - 'dependencies'
+      - 'ci'
+    commit-message:
+      prefix: 'chore(ci)'

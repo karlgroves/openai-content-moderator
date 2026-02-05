@@ -12,6 +12,7 @@ This guide covers deploying the OpenAI Content Moderator API to AWS Lambda using
 ## Setup
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -65,9 +66,10 @@ The `serverless.yml` file contains all deployment configuration:
 ### Environment Variables
 
 The following environment variables are configured:
+
 - `OPENAI_API_KEY`: Your OpenAI API key (required)
 - `NODE_ENV`: Set based on deployment stage
-- `CORS_ORIGIN`: CORS configuration (defaults to '*')
+- `CORS_ORIGIN`: CORS configuration (defaults to '\*')
 
 ## API Endpoints
 

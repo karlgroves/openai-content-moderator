@@ -30,7 +30,7 @@ jobs:
         if: success()
         uses: dependabot/fetch-metadata@v1
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
         id: metadata
 
       - name: Enable auto-merge for Dependabot PRs

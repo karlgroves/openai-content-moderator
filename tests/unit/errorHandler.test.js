@@ -8,7 +8,7 @@ describe('Error Handler Middleware', () => {
     req = createMockReq();
     res = createMockRes();
     next = createMockNext();
-    
+
     // Mock console.error to avoid test output pollution
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -26,7 +26,7 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Test error'
+        message: 'Test error',
       });
       expect(console.error).toHaveBeenCalledWith('Error:', error);
     });
@@ -40,7 +40,7 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Not found'
+        message: 'Not found',
       });
     });
 
@@ -53,7 +53,7 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Bad request'
+        message: 'Bad request',
       });
     });
 
@@ -65,14 +65,14 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       });
     });
 
     it('should include stack trace in development environment', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
-      
+
       const error = new Error('Development error');
       error.stack = 'Error stack trace';
 
@@ -81,16 +81,16 @@ describe('Error Handler Middleware', () => {
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
         message: 'Development error',
-        stack: 'Error stack trace'
+        stack: 'Error stack trace',
       });
-      
+
       process.env.NODE_ENV = originalEnv;
     });
 
     it('should not include stack trace in production environment', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
-      
+
       const error = new Error('Production error');
       error.stack = 'Error stack trace';
 
@@ -98,9 +98,9 @@ describe('Error Handler Middleware', () => {
 
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Production error'
+        message: 'Production error',
       });
-      
+
       process.env.NODE_ENV = originalEnv;
     });
   });

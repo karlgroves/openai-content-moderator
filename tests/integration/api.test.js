@@ -6,44 +6,44 @@ const bodyParser = require('body-parser');
 // Import middleware and routes
 const { errorHandler } = require('../../middleware/errorHandler');
 const moderationRoutes = require('../../routes/moderation');
-const { 
-  mockOpenAISuccess, 
+const {
+  mockOpenAISuccess,
   mockOpenAISpecificError,
-  mockOpenAIFlagged 
+  mockOpenAIFlagged,
 } = require('../helpers/testHelpers');
 const { validTestCases, invalidTestCases } = require('../fixtures/mockData');
 
 // Create test app
 const createTestApp = () => {
   const app = express();
-  
+
   app.use(cors());
   app.use(bodyParser.json());
-  
+
   app.get('/health', (req, res) => {
-    res.json({ 
+    res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'openai-content-moderator'
+      service: 'openai-content-moderator',
     });
   });
-  
+
   app.use('/api/moderation', moderationRoutes);
-  
+
   app.post('/moderate', (req, res) => {
     req.url = '/api/moderation/text';
     app.handle(req, res);
   });
-  
+
   app.use((req, res) => {
-    res.status(404).json({ 
+    res.status(404).json({
       error: 'Not found',
-      message: `The requested endpoint ${req.path} does not exist`
+      message: `The requested endpoint ${req.path} does not exist`,
     });
   });
-  
+
   app.use(errorHandler);
-  
+
   return app;
 };
 
@@ -53,17 +53,17 @@ describe('API Integration Tests', () => {
   beforeEach(() => {
     // Set up environment for OpenAI
     process.env.OPENAI_API_KEY = 'test-api-key';
-    
+
     // Disable Perspective API by default for tests (can be enabled per test)
     process.env.PERSPECTIVE_API_ENABLED = 'false';
     process.env.GOOGLE_PERSPECTIVE_API_KEY = '';
-    
+
     // Clear require cache for modules that depend on config
     delete require.cache[require.resolve('../../config')];
     delete require.cache[require.resolve('../../middleware/moderation')];
     delete require.cache[require.resolve('../../middleware/perspective')];
     delete require.cache[require.resolve('../../routes/moderation')];
-    
+
     app = createTestApp();
   });
 
@@ -75,14 +75,12 @@ describe('API Integration Tests', () => {
 
   describe('GET /health', () => {
     it('should return health status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toEqual({
         status: 'healthy',
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
-        service: 'openai-content-moderator'
+        service: 'openai-content-moderator',
       });
     });
   });
@@ -106,7 +104,7 @@ describe('API Integration Tests', () => {
       expect(response.body.metadata).toEqual({
         timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
         textLength: testText.length,
-        servicesUsed: ['openai']
+        servicesUsed: ['openai'],
       });
     });
 
@@ -130,10 +128,7 @@ describe('API Integration Tests', () => {
       it(`should handle ${description}`, async () => {
         const scope = mockOpenAISuccess(input.text);
 
-        const response = await request(app)
-          .post('/api/moderation/text')
-          .send(input)
-          .expect(200);
+        const response = await request(app).post('/api/moderation/text').send(input).expect(200);
 
         expect(scope.isDone()).toBe(true);
         expect(response.body).toHaveProperty('flagged');
@@ -145,22 +140,18 @@ describe('API Integration Tests', () => {
     // Test all invalid cases
     invalidTestCases.forEach(({ description, input, expectedError }) => {
       it(`should return 400 for ${description}`, async () => {
-        const response = await request(app)
-          .post('/api/moderation/text')
-          .send(input)
-          .expect(400);
+        const response = await request(app).post('/api/moderation/text').send(input).expect(400);
 
         expect(response.body).toEqual({
           error: expectedError,
           field: 'text',
           ...(expectedError.includes('exceeds maximum length') && {
             maxLength: 32768,
-            currentLength: expect.any(Number)
-          })
+            currentLength: expect.any(Number),
+          }),
         });
       });
     });
-
 
     it('should handle malformed JSON', async () => {
       const response = await request(app)
@@ -188,18 +179,16 @@ describe('API Integration Tests', () => {
 
   describe('GET /api/moderation/models', () => {
     it('should return available models', async () => {
-      const response = await request(app)
-        .get('/api/moderation/models')
-        .expect(200);
+      const response = await request(app).get('/api/moderation/models').expect(200);
 
       expect(response.body).toEqual({
         models: [
           {
             id: 'omni-moderation-latest',
             name: 'Omni Moderation Latest',
-            description: 'Latest OpenAI moderation model'
-          }
-        ]
+            description: 'Latest OpenAI moderation model',
+          },
+        ],
       });
     });
   });
@@ -209,10 +198,7 @@ describe('API Integration Tests', () => {
       const testText = 'Legacy endpoint test';
       const scope = mockOpenAISuccess(testText);
 
-      const response = await request(app)
-        .post('/moderate')
-        .send({ text: testText })
-        .expect(200);
+      const response = await request(app).post('/moderate').send({ text: testText }).expect(200);
 
       expect(scope.isDone()).toBe(true);
       expect(response.body).toHaveProperty('flagged');
@@ -221,16 +207,13 @@ describe('API Integration Tests', () => {
     });
   });
 
-
   describe('Error handling', () => {
     it('should return 404 for non-existent endpoints', async () => {
-      const response = await request(app)
-        .get('/non-existent-endpoint')
-        .expect(404);
+      const response = await request(app).get('/non-existent-endpoint').expect(404);
 
       expect(response.body).toEqual({
         error: 'Not found',
-        message: 'The requested endpoint /non-existent-endpoint does not exist'
+        message: 'The requested endpoint /non-existent-endpoint does not exist',
       });
     });
 
@@ -246,17 +229,13 @@ describe('API Integration Tests', () => {
 
   describe('CORS', () => {
     it('should include CORS headers', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.headers).toHaveProperty('access-control-allow-origin');
     });
 
     it('should handle preflight requests', async () => {
-      const response = await request(app)
-        .options('/api/moderation/text')
-        .expect(204);
+      const response = await request(app).options('/api/moderation/text').expect(204);
 
       expect(response.headers).toHaveProperty('access-control-allow-origin');
       expect(response.headers).toHaveProperty('access-control-allow-methods');

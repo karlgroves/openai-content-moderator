@@ -2,15 +2,15 @@ module.exports = {
   // Server configuration
   server: {
     port: process.env.PORT || 8000,
-    env: process.env.NODE_ENV || 'development'
+    env: process.env.NODE_ENV || 'development',
   },
-  
+
   // OpenAI configuration
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
-    model: process.env.OPENAI_MODEL || 'omni-moderation-latest'
+    model: process.env.OPENAI_MODEL || 'omni-moderation-latest',
   },
-  
+
   // Google Perspective API configuration
   googlePerspective: {
     apiKey: process.env.GOOGLE_PERSPECTIVE_API_KEY,
@@ -22,19 +22,19 @@ module.exports = {
       IDENTITY_ATTACK: { scoreThreshold: 0.7 },
       INSULT: { scoreThreshold: 0.7 },
       PROFANITY: { scoreThreshold: 0.7 },
-      THREAT: { scoreThreshold: 0.7 }
-    }
+      THREAT: { scoreThreshold: 0.7 },
+    },
   },
-  
+
   // CORS configuration
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
-    credentials: true
+    credentials: true,
   },
-  
+
   // Rate limiting configuration (for future implementation)
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-  }
+    max: 100, // limit each IP to 100 requests per windowMs
+  },
 };
