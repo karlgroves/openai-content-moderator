@@ -265,11 +265,11 @@ curl http://localhost:8000/api/moderation/models
 const response = await fetch('http://localhost:8000/api/moderation/text', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    text: 'Content to moderate'
-  })
+    text: 'Content to moderate',
+  }),
 });
 
 const result = await response.json();
@@ -290,6 +290,7 @@ npm run test:coverage
 
 # Run tests in watch mode (for development)
 npm run test:watch
+
 
 # Run only unit tests
 npm run test:unit
@@ -329,15 +330,15 @@ jest tests/integration
 
 Configure the application using environment variables in your `.env` file:
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | Yes | - | Your OpenAI API key |
-| `OPENAI_MODEL` | No | `omni-moderation-latest` | OpenAI moderation model to use |
-| `GOOGLE_PERSPECTIVE_API_KEY` | No | - | Google Perspective API key (optional) |
-| `PERSPECTIVE_API_ENABLED` | No | `false` | Enable Google Perspective API integration |
-| `PORT` | No | `8000` | Port number for the API server |
-| `NODE_ENV` | No | `development` | Environment (development/production) |
-| `CORS_ORIGIN` | No | `*` | CORS allowed origins |
+| Variable                     | Required | Default                  | Description                               |
+| ---------------------------- | -------- | ------------------------ | ----------------------------------------- |
+| `OPENAI_API_KEY`             | Yes      | -                        | Your OpenAI API key                       |
+| `OPENAI_MODEL`               | No       | `omni-moderation-latest` | OpenAI moderation model to use            |
+| `GOOGLE_PERSPECTIVE_API_KEY` | No       | -                        | Google Perspective API key (optional)     |
+| `PERSPECTIVE_API_ENABLED`    | No       | `false`                  | Enable Google Perspective API integration |
+| `PORT`                       | No       | `8000`                   | Port number for the API server            |
+| `NODE_ENV`                   | No       | `development`            | Environment (development/production)      |
+| `CORS_ORIGIN`                | No       | `*`                      | CORS allowed origins                      |
 
 ### Example `.env` file
 
@@ -399,15 +400,15 @@ The API provides consistent error responses with detailed information:
 
 ### HTTP Status Codes
 
-| Status Code | Description | Example |
-|-------------|-------------|----------|
-| 200 | Success | Request processed successfully |
-| 400 | Bad Request | Missing or invalid text field |
-| 401 | Unauthorized | Invalid or missing OpenAI API key |
-| 413 | Payload Too Large | Text exceeds 32,768 characters |
-| 429 | Rate Limited | OpenAI API rate limit exceeded |
-| 500 | Server Error | Unexpected server error |
-| 503 | Service Unavailable | OpenAI API temporarily unavailable |
+| Status Code | Description         | Example                            |
+| ----------- | ------------------- | ---------------------------------- |
+| 200         | Success             | Request processed successfully     |
+| 400         | Bad Request         | Missing or invalid text field      |
+| 401         | Unauthorized        | Invalid or missing OpenAI API key  |
+| 413         | Payload Too Large   | Text exceeds 32,768 characters     |
+| 429         | Rate Limited        | OpenAI API rate limit exceeded     |
+| 500         | Server Error        | Unexpected server error            |
+| 503         | Service Unavailable | OpenAI API temporarily unavailable |
 
 ### Common Error Scenarios
 
@@ -507,7 +508,7 @@ serverless deploy
 
 4. **CORS Configuration:**
    - Set specific origins in production
-   - Avoid using wildcard (*) in production environments
+   - Avoid using wildcard (\*) in production environments
 
 ## Monitoring and Logging
 

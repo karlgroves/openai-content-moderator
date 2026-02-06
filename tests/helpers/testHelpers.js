@@ -3,12 +3,13 @@ const { mockOpenAIResponse, mockFlaggedResponse } = require('../fixtures/mockDat
 
 // Helper to mock OpenAI API calls
 const mockOpenAISuccess = (text = 'test text', response = mockOpenAIResponse) => {
-  return nock('https://api.openai.com')
-    .post('/v1/moderations')
-    .reply(200, response);
+  return nock('https://api.openai.com').post('/v1/moderations').reply(200, response);
 };
 
-const mockOpenAIError = (statusCode = 500, errorBody = { error: { message: 'Internal server error' } }) => {
+const mockOpenAIError = (
+  statusCode = 500,
+  errorBody = { error: { message: 'Internal server error' } }
+) => {
   return nock('https://api.openai.com')
     .post('/v1/moderations')
     .times(3) // Handle retries
@@ -21,10 +22,10 @@ const mockOpenAISpecificError = (statusCode, message) => {
     error: {
       message: message,
       type: 'invalid_request_error',
-      code: statusCode === 401 ? 'invalid_api_key' : null
-    }
+      code: statusCode === 401 ? 'invalid_api_key' : null,
+    },
   };
-  
+
   return nock('https://api.openai.com')
     .post('/v1/moderations')
     .times(3) // Handle retries
@@ -39,7 +40,7 @@ const mockOpenAIFlagged = (text = 'offensive text') => {
 const createMockReq = (body = {}) => ({
   body,
   moderationResults: null,
-  moderationMetadata: null
+  moderationMetadata: null,
 });
 
 const createMockRes = () => {
@@ -55,7 +56,7 @@ const createMockNext = () => jest.fn();
 const createExpectedMetadata = (textLength, model = 'omni-moderation-latest') => ({
   timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
   textLength,
-  model
+  model,
 });
 
 // Helper to wait for async operations
@@ -70,5 +71,5 @@ module.exports = {
   createMockRes,
   createMockNext,
   createExpectedMetadata,
-  waitFor
+  waitFor,
 };

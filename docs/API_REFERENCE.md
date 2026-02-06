@@ -37,9 +37,9 @@ Content-Type: application/json
 
 **Parameters:**
 
-| Name | Type | Required | Description | Constraints |
-|------|------|----------|-------------|-------------|
-| text | string | Yes | The text content to moderate | Max 32,768 characters |
+| Name | Type   | Required | Description                  | Constraints           |
+| ---- | ------ | -------- | ---------------------------- | --------------------- |
+| text | string | Yes      | The text content to moderate | Max 32,768 characters |
 
 ##### Response
 
@@ -206,32 +206,32 @@ All errors follow this structure:
 {
   "error": "string",
   "message": "string",
-  "field": "string"  // Optional, only for validation errors
+  "field": "string" // Optional, only for validation errors
 }
 ```
 
 ### Error Types
 
-| Error Type | Description | Common Causes |
-|------------|-------------|---------------|
-| ValidationError | Input validation failed | Missing or invalid fields |
-| AuthenticationError | OpenAI authentication failed | Invalid API key |
-| RateLimitError | Rate limit exceeded | Too many requests |
-| APIError | OpenAI API error | Service issues |
-| ServerError | Internal server error | Unexpected errors |
+| Error Type          | Description                  | Common Causes             |
+| ------------------- | ---------------------------- | ------------------------- |
+| ValidationError     | Input validation failed      | Missing or invalid fields |
+| AuthenticationError | OpenAI authentication failed | Invalid API key           |
+| RateLimitError      | Rate limit exceeded          | Too many requests         |
+| APIError            | OpenAI API error             | Service issues            |
+| ServerError         | Internal server error        | Unexpected errors         |
 
 ### Status Codes
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| 200 | OK | Request successful |
-| 301 | Moved Permanently | Resource moved (legacy endpoints) |
-| 400 | Bad Request | Invalid request data |
-| 401 | Unauthorized | Authentication failed |
-| 413 | Payload Too Large | Request body too large |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
-| 503 | Service Unavailable | Service temporarily down |
+| Code | Meaning               | Description                       |
+| ---- | --------------------- | --------------------------------- |
+| 200  | OK                    | Request successful                |
+| 301  | Moved Permanently     | Resource moved (legacy endpoints) |
+| 400  | Bad Request           | Invalid request data              |
+| 401  | Unauthorized          | Authentication failed             |
+| 413  | Payload Too Large     | Request body too large            |
+| 429  | Too Many Requests     | Rate limit exceeded               |
+| 500  | Internal Server Error | Server error                      |
+| 503  | Service Unavailable   | Service temporarily down          |
 
 ## Rate Limiting
 
@@ -264,9 +264,9 @@ class ModerationClient {
     const response = await fetch(`${this.baseUrl}/api/moderation/text`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text }),
     });
 
     if (!response.ok) {
@@ -303,7 +303,7 @@ import json
 class ModerationClient:
     def __init__(self, base_url='http://localhost:8000'):
         self.base_url = base_url
-        
+
     def moderate_text(self, text):
         response = requests.post(
             f'{self.base_url}/api/moderation/text',
@@ -312,12 +312,12 @@ class ModerationClient:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_models(self):
         response = requests.get(f'{self.base_url}/api/moderation/models')
         response.raise_for_status()
         return response.json()
-    
+
     def check_health(self):
         response = requests.get(f'{self.base_url}/health')
         response.raise_for_status()

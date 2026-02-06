@@ -114,6 +114,9 @@ dist
 .serverless/
 .webpack/
 
+# jscpd reports
+reports/
+
 # FuseBox cache
 .fusebox/
 

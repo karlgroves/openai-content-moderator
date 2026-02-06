@@ -96,7 +96,7 @@ If `flagged` is `true`, the content was identified as potentially harmful. Check
 The `category_scores` provide confidence levels:
 
 - **0.0 - 0.3**: Low confidence
-- **0.3 - 0.7**: Medium confidence  
+- **0.3 - 0.7**: Medium confidence
 - **0.7 - 1.0**: High confidence
 
 Higher scores indicate stronger confidence that the content belongs to that category.
@@ -121,15 +121,15 @@ async function checkComment(comment) {
   const response = await fetch('/api/moderation/text', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: comment })
+    body: JSON.stringify({ text: comment }),
   });
-  
+
   const result = await response.json();
-  
+
   if (result.results.flagged) {
     return { allowed: false, reason: 'Content violates guidelines' };
   }
-  
+
   return { allowed: true };
 }
 ```
@@ -141,11 +141,11 @@ Real-time message filtering:
 ```python
 def filter_message(message):
     response = moderate_text(message)
-    
+
     if response['results']['flagged']:
         # Don't send the message
         return "Your message was blocked due to inappropriate content"
-    
+
     # Send the message normally
     return None
 ```
@@ -157,21 +157,18 @@ Check articles or posts before publication:
 ```javascript
 function screenContent(title, body) {
   // Check both title and body
-  const promises = [
-    moderateText(title),
-    moderateText(body)
-  ];
-  
+  const promises = [moderateText(title), moderateText(body)];
+
   return Promise.all(promises).then(results => {
     const titleFlagged = results[0].results.flagged;
     const bodyFlagged = results[1].results.flagged;
-    
+
     return {
       approved: !titleFlagged && !bodyFlagged,
       issues: {
         title: titleFlagged,
-        body: bodyFlagged
-      }
+        body: bodyFlagged,
+      },
     };
   });
 }
@@ -263,17 +260,17 @@ If you encounter issues:
 ```php
 function moderate_comment($comment_text) {
     $api_url = 'http://your-api/api/moderation/text';
-    
+
     $response = wp_remote_post($api_url, array(
         'headers' => array('Content-Type' => 'application/json'),
         'body' => json_encode(array('text' => $comment_text)),
         'timeout' => 30
     ));
-    
+
     if (is_wp_error($response)) {
         return array('error' => true);
     }
-    
+
     $body = wp_remote_retrieve_body($response);
     return json_decode($body, true);
 }
@@ -285,27 +282,24 @@ function moderate_comment($comment_text) {
 function CommentForm() {
   const [comment, setComment] = useState('');
   const [error, setError] = useState(null);
-  
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     const moderation = await checkModeration(comment);
-    
+
     if (moderation.results.flagged) {
       setError('Your comment contains inappropriate content');
       return;
     }
-    
+
     // Submit comment
     await submitComment(comment);
   };
-  
+
   return (
     <form onSubmit={handleSubmit}>
-      <textarea 
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
+      <textarea value={comment} onChange={e => setComment(e.target.value)} />
       {error && <p className="error">{error}</p>}
       <button type="submit">Post Comment</button>
     </form>

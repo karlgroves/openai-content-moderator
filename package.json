@@ -11,6 +11,15 @@
     "test:coverage": "jest --coverage",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:md": "markdownlint '**/*.md' --ignore node_modules",
+    "lint:cpd": "jscpd . --config .jscpd.json",
+    "lint:cpd:ci": "jscpd . --config .jscpd.json --threshold 5",
+    "security:audit": "npm audit",
+    "security:check": "npm audit --audit-level=high",
     "deploy": "serverless deploy",
     "deploy:prod": "serverless deploy --stage prod",
     "offline": "serverless offline",
@@ -19,7 +28,20 @@
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
     "release:patch": "standard-version --release-as patch",
-    "release:first": "standard-version --first-release"
+    "release:first": "standard-version --first-release",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint --fix"
+    ],
+    "*.{json,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -33,9 +55,17 @@
     "serverless-http": "^3.2.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
+    "eslint": "^9.39.2",
+    "globals": "^17.3.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
+    "jscpd": "^4.0.8",
+    "lint-staged": "^16.2.7",
+    "markdownlint-cli": "^0.47.0",
     "nock": "^14.0.5",
+    "prettier": "^3.8.1",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.3.3",
