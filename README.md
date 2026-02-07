@@ -295,7 +295,7 @@ npm run test:watch
 # Run only unit tests
 npm run test:unit
 
-# Run only integration tests  
+# Run only integration tests
 npm run test:integration
 ```
 
