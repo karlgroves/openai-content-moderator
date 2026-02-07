@@ -47,11 +47,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.4",
-    "cors": "^2.8.5",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.7",
-    "express": "^4.22.1",
-    "openai": "^4.77.0",
+    "express": "^5.2.1",
+    "openai": "^6.18.0",
     "serverless-http": "^3.2.0"
   },
   "devDependencies": {
@@ -60,16 +60,16 @@
     "eslint": "^9.39.2",
     "globals": "^17.3.0",
     "husky": "^9.1.7",
-    "jest": "^30.0.2",
+    "jest": "^30.2.0",
     "jscpd": "^4.0.8",
     "lint-staged": "^16.2.7",
     "markdownlint-cli": "^0.47.0",
-    "nock": "^14.0.5",
+    "nock": "^14.0.10",
     "prettier": "^3.8.1",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.3.3",
     "standard-version": "^9.5.0",
-    "supertest": "^7.1.1"
+    "supertest": "^7.2.2"
   }
 }
