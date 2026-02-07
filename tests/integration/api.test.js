@@ -30,9 +30,9 @@ const createTestApp = () => {
 
   app.use('/api/moderation', moderationRoutes);
 
-  app.post('/moderate', (req, res) => {
-    req.url = '/api/moderation/text';
-    app.handle(req, res);
+  app.post('/moderate', (req, res, next) => {
+    req.url = '/text';
+    moderationRoutes(req, res, next);
   });
 
   app.use((req, res) => {
