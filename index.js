@@ -33,10 +33,9 @@ app.get('/health', (req, res) => {
 app.use('/api/moderation', moderationRoutes);
 
 // Legacy endpoint for backward compatibility
-app.post('/moderate', (req, res) => {
-  // Redirect to new API endpoint
-  req.url = '/api/moderation/text';
-  app.handle(req, res);
+app.post('/moderate', (req, res, next) => {
+  req.url = '/text';
+  moderationRoutes(req, res, next);
 });
 
 // 404 handler
