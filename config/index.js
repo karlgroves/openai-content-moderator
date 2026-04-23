@@ -27,8 +27,13 @@ module.exports = {
   },
 
   // CORS configuration
+  // CORS_ORIGIN is a comma-separated allowlist of exact origins.
+  // Wildcard '*' is rejected at startup because credentials=true forbids it.
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origins: (process.env.CORS_ORIGIN || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean),
     credentials: true,
   },
 

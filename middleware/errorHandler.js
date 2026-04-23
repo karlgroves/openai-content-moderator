@@ -2,19 +2,18 @@
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
-  // Default error response
+  // Set appropriate status code
+  const statusCode = err.statusCode || err.status || 500;
+
+  // Never expose internal error details to clients
   const errorResponse = {
-    error: 'Internal server error',
-    message: err.message || 'An unexpected error occurred',
+    error: statusCode === 500 ? 'Internal server error' : err.message || 'An error occurred',
   };
 
-  // Add stack trace in development
+  // Only add stack trace in development
   if (process.env.NODE_ENV === 'development') {
     errorResponse.stack = err.stack;
   }
-
-  // Set appropriate status code
-  const statusCode = err.statusCode || err.status || 500;
 
   res.status(statusCode).json(errorResponse);
 };

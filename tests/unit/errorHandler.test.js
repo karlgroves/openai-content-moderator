@@ -26,7 +26,6 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Test error',
       });
       expect(console.error).toHaveBeenCalledWith('Error:', error);
     });
@@ -39,8 +38,7 @@ describe('Error Handler Middleware', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Internal server error',
-        message: 'Not found',
+        error: 'Not found',
       });
     });
 
@@ -52,8 +50,7 @@ describe('Error Handler Middleware', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Internal server error',
-        message: 'Bad request',
+        error: 'Bad request',
       });
     });
 
@@ -65,7 +62,6 @@ describe('Error Handler Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'An unexpected error occurred',
       });
     });
 
@@ -80,7 +76,6 @@ describe('Error Handler Middleware', () => {
 
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Development error',
         stack: 'Error stack trace',
       });
 
@@ -98,7 +93,6 @@ describe('Error Handler Middleware', () => {
 
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
-        message: 'Production error',
       });
 
       process.env.NODE_ENV = originalEnv;

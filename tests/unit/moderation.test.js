@@ -161,7 +161,6 @@ describe('Moderation Middleware - Core Functionality', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Failed to process moderation request',
-        message: 'Custom error message',
       });
       expect(next).not.toHaveBeenCalled();
     });
@@ -178,7 +177,6 @@ describe('Moderation Middleware - Core Functionality', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Failed to process moderation request',
-        message: '500 status code (no body)',
       });
       expect(next).not.toHaveBeenCalled();
     });
