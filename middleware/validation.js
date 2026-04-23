@@ -26,6 +26,14 @@ const validateModerationRequest = (req, res, next) => {
     });
   }
 
+  // Reject null bytes
+  if (text.includes('\0')) {
+    return res.status(400).json({
+      error: 'Text contains invalid characters.',
+      field: 'text',
+    });
+  }
+
   // Check text length (OpenAI has limits)
   if (text.length > 32768) {
     return res.status(400).json({

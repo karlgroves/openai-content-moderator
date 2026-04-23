@@ -46,10 +46,9 @@ const moderateContent = async (req, res, next) => {
       });
     }
 
-    // Generic error response
+    // Generic error response - don't expose internal error details
     res.status(500).json({
       error: 'Failed to process moderation request',
-      message: error.error?.message || error.message || 'An unexpected error occurred',
     });
   }
 };

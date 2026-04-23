@@ -2,7 +2,7 @@ service: openai-content-moderator
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
   environment:
@@ -29,9 +29,7 @@ functions:
           cors: true
 
 plugins:
-  - serverless-http
   - serverless-offline
-  - serverless-dotenv-plugin
 
 custom:
   serverless-offline:

@@ -1,5 +1,13 @@
 const config = require('../config');
 
+// Custom error class to carry HTTP status from Perspective API
+class PerspectiveApiError extends Error {
+  constructor(statusCode, message) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
+
 // Helper function to make API request to Perspective API
 const makePerspectiveRequest = async text => {
   const url = `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${config.googlePerspective.apiKey}`;
@@ -19,9 +27,10 @@ const makePerspectiveRequest = async text => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(
-      `Perspective API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`
+    const errorData = await response.json().catch(() => ({}));
+    throw new PerspectiveApiError(
+      response.status,
+      errorData.error?.message || 'Unknown Perspective API error'
     );
   }
 
@@ -80,23 +89,25 @@ const moderateWithPerspective = async (req, res, next) => {
   } catch (error) {
     console.error('Perspective API Error:', error);
 
-    // Handle specific Perspective API errors
-    if (error.message.includes('400')) {
-      return res.status(400).json({
-        error: 'Invalid request format for Perspective API',
-      });
-    } else if (error.message.includes('401') || error.message.includes('403')) {
-      return res.status(401).json({
-        error: 'Invalid API key. Please check your Google Perspective API key configuration.',
-      });
-    } else if (error.message.includes('429')) {
-      return res.status(429).json({
-        error: 'Rate limit exceeded for Perspective API. Please try again later.',
-      });
-    } else if (error.message.includes('503') || error.message.includes('502')) {
-      return res.status(503).json({
-        error: 'Perspective API service is temporarily unavailable. Please try again later.',
-      });
+    // Handle specific Perspective API errors using status codes
+    if (error instanceof PerspectiveApiError) {
+      if (error.statusCode === 400) {
+        return res.status(400).json({
+          error: 'Invalid request format for Perspective API',
+        });
+      } else if (error.statusCode === 401 || error.statusCode === 403) {
+        return res.status(401).json({
+          error: 'Invalid API key. Please check your Google Perspective API key configuration.',
+        });
+      } else if (error.statusCode === 429) {
+        return res.status(429).json({
+          error: 'Rate limit exceeded for Perspective API. Please try again later.',
+        });
+      } else if (error.statusCode === 503 || error.statusCode === 502) {
+        return res.status(503).json({
+          error: 'Perspective API service is temporarily unavailable. Please try again later.',
+        });
+      }
     }
 
     // If Perspective fails, log error but continue without it
