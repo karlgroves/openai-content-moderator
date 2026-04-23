@@ -64,6 +64,9 @@
     "openai": "^6.18.0",
     "serverless-http": "^4.0.0"
   },
+  "overrides": {
+    "fast-xml-parser": "^5.7.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
