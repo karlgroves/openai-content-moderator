@@ -57,16 +57,16 @@ describe('Config', () => {
   });
 
   describe('CORS Configuration', () => {
-    it('should use default CORS origin when CORS_ORIGIN is not set', () => {
+    it('should default to an empty allowlist when CORS_ORIGIN is not set', () => {
       delete process.env.CORS_ORIGIN;
       const config = require('../../config');
-      expect(config.cors.origin).toBe('*');
+      expect(config.cors.origins).toEqual([]);
     });
 
-    it('should use CORS_ORIGIN environment variable when set', () => {
-      process.env.CORS_ORIGIN = 'https://example.com';
+    it('should parse CORS_ORIGIN as a comma-separated allowlist', () => {
+      process.env.CORS_ORIGIN = 'https://example.com, https://foo.test';
       const config = require('../../config');
-      expect(config.cors.origin).toBe('https://example.com');
+      expect(config.cors.origins).toEqual(['https://example.com', 'https://foo.test']);
     });
 
     it('should always set credentials to true', () => {

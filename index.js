@@ -16,10 +16,23 @@ const PORT = process.env.PORT || 8000;
 // Security headers
 app.use(helmet());
 
-// CORS - use configured origin instead of wildcard default
+// CORS - strict allowlist; reject wildcard because credentials are enabled
+if (config.cors.origins.includes('*')) {
+  throw new Error(
+    'CORS_ORIGIN cannot contain "*" when credentials are enabled. Set an explicit allowlist.'
+  );
+}
 app.use(
   cors({
-    origin: config.cors.origin,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (config.cors.origins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error('Origin not allowed by CORS'));
+    },
     credentials: config.cors.credentials,
   })
 );
