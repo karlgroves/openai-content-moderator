@@ -178,10 +178,21 @@ Legacy endpoint maintained for backward compatibility. Automatically redirects t
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 20.x or higher (see `.nvmrc` — run `nvm use`)
 - npm or yarn
 - OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
 - nodemon (for development mode) - `npm install -g nodemon`
+
+#### Optional security CLIs
+
+The `security:*` npm scripts below use external binaries. If a binary is
+missing, the corresponding script prints an install hint and exits 0.
+
+| Tool | Purpose | Install |
+| --- | --- | --- |
+| [`osv-scanner`](https://github.com/google/osv-scanner) | CVEs in dependencies | `brew install osv-scanner` |
+| [`semgrep`](https://semgrep.dev/) | Static analysis (OWASP Top 10, Node.js rules) | `brew install semgrep` or `pip install semgrep` |
+| [`gitleaks`](https://github.com/gitleaks/gitleaks) | Secret scanning | `brew install gitleaks` |
 
 ### Step-by-Step Installation
 
