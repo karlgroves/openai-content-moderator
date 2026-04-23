@@ -1,5 +1,9 @@
 const config = require('../config');
 
+// Lookup table built once so we can use Map.get() for attribute config
+// instead of a computed property access on the plain config object.
+const attributeConfigs = new Map(Object.entries(config.googlePerspective.attributes));
+
 // Custom error class to carry HTTP status from Perspective API
 class PerspectiveApiError extends Error {
   constructor(statusCode, message) {
@@ -45,9 +49,9 @@ const transformPerspectiveResults = perspectiveResponse => {
   if (perspectiveResponse.attributeScores) {
     Object.entries(perspectiveResponse.attributeScores).forEach(([attribute, data]) => {
       const score = data.summaryScore?.value || 0;
+      const threshold = attributeConfigs.get(attribute)?.scoreThreshold ?? Infinity;
       scores[attribute.toLowerCase()] = score;
-      categories[attribute.toLowerCase()] =
-        score > config.googlePerspective.attributes[attribute]?.scoreThreshold;
+      categories[attribute.toLowerCase()] = score > threshold;
     });
   }
 
