@@ -1,1 +1,9 @@
 npx lint-staged
+
+# Gitleaks: best-effort secret scanning. Install via `brew install gitleaks`
+# (or a release binary) to enable. Hook passes silently if not installed.
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --no-banner
+else
+  echo "[hint] gitleaks not installed — skipping secret scan. Install: brew install gitleaks"
+fi
