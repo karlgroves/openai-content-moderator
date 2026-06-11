@@ -7,7 +7,7 @@
 ## Context
 
 Phase 2 of issue #30 added npm scripts for `osv-scanner`, `semgrep`,
-and `gitleaks`. These are external binaries (Rust, Python, Go) not
+and `gitleaks`. These are external binaries (Go, Python) not
 installable via npm. A new contributor running `npm install` followed
 by any of the `security:*` scripts would hit an immediate "command not
 found" failure unless they had installed each tool first.
