@@ -10,7 +10,15 @@
 #
 # Exits with the tool's exit code when it runs, or 0 when skipped.
 
-set -e
+set -eu
+
+# Guard against a mis-wired call (fewer than 2 args), which would otherwise
+# slip past `shift 2` and print a misleading "<hint> not installed" message
+# while exiting 0.
+if [ "$#" -lt 2 ]; then
+  echo "usage: maybe-run.sh <tool> <install-hint> [args...]" >&2
+  exit 2
+fi
 
 tool="$1"
 hint="$2"

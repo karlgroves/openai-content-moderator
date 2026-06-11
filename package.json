@@ -22,8 +22,8 @@
     "security:check": "npm audit --audit-level=high",
     "security:osv": "scripts/maybe-run.sh osv-scanner 'brew install osv-scanner' --lockfile=package-lock.json",
     "security:semgrep": "scripts/maybe-run.sh semgrep 'brew install semgrep (or pip install semgrep)' --config=p/javascript --config=p/nodejsscan --config=p/owasp-top-ten --error --metrics=off",
-    "security:secrets": "scripts/maybe-run.sh gitleaks 'brew install gitleaks' detect --no-banner",
-    "security:licenses": "license-checker-rseidelsohn --production --onlyAllow 'MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;Unlicense;Python-2.0;WTFPL;BlueOak-1.0.0' --excludePrivatePackages --summary",
+    "security:secrets": "scripts/maybe-run.sh gitleaks 'brew install gitleaks' detect --no-banner --redact",
+    "security:licenses": "license-checker-rseidelsohn --production --onlyAllow 'MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;Unlicense;BlueOak-1.0.0' --excludePrivatePackages --summary",
     "security:all": "run-s security:check security:osv security:semgrep security:secrets security:licenses",
     "deploy": "serverless deploy",
     "deploy:prod": "serverless deploy --stage prod",
@@ -65,7 +65,7 @@
     "serverless-http": "^4.0.0"
   },
   "overrides": {
-    "fast-xml-parser": "^5.7.0"
+    "fast-xml-parser": "5.7.1"
   },
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
