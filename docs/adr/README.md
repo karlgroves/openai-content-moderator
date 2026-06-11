@@ -20,6 +20,7 @@ We use a compact [MADR](https://adr.github.io/madr/)-style template. See
 | [0003](0003-plain-javascript-not-typescript.md) | Plain JavaScript, not TypeScript | Accepted |
 | [0004](0004-best-effort-security-cli-wrappers.md) | Best-effort wrappers for external security CLIs | Accepted |
 | [0005](0005-new-eslint-rules-start-at-warn.md) | New ESLint rules start at `warn` level | Accepted |
+| [0006](0006-trufflehog-for-secret-scanning.md) | TruffleHog for secret scanning (replacing gitleaks) | Accepted |
 
 ## Creating a new ADR
 

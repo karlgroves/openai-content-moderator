@@ -12,6 +12,20 @@ permissions:
   security-events: write
 
 jobs:
+  # Secret scanning on every push/PR — fails the build on verified secrets
+  secret-scan:
+    name: Secret Scan (TruffleHog)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified --fail
+
   # Quick scan on every push/PR
   npm-audit:
     name: NPM Audit
