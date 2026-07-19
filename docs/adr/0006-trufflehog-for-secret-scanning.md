@@ -22,7 +22,7 @@ relevant differences:
   rules.
 - **Licensing** — the gitleaks GitHub Action requires a paid license for
   organization use; TruffleHog is fully open source (AGPL-3.0). The AGPL
-  applies to the tool we *run*, not to this MIT/ISC-licensed project, so
+  applies to the tool we _run_, not to this MIT/ISC-licensed project, so
   it carries no obligation for our source.
 - **Maintenance** — TruffleHog ships frequent detector updates and has a
   larger contributor base.
@@ -32,14 +32,21 @@ relevant differences:
 Replace `gitleaks` with `trufflehog` everywhere it was referenced:
 
 - `security:secrets` runs
-  `trufflehog git file://. --since-commit HEAD --only-verified --fail`,
+  `trufflehog git file://. --only-verified --fail`, scanning the full
+  repository history — the case that matters most, since a committed
+  secret stays exploitable even after a later commit removes it. It is
   still wrapped in `scripts/maybe-run.sh` so a missing binary degrades to
   an install hint rather than a hard failure (the best-effort pattern from
   [0004](0004-best-effort-security-cli-wrappers.md) is retained).
-- The Husky `pre-commit` hook runs the same best-effort scan.
+- The Husky `pre-commit` hook scans the **staged paths** with
+  `trufflehog filesystem`. Note that TruffleHog's documented pre-commit
+  recipe, `git file://. --since-commit HEAD`, scans commits _after_ HEAD
+  and therefore scans nothing from a pre-commit hook; the filesystem
+  source is used instead.
 - CI (`security.yml`) gains a `secret-scan` job using the
-  `trufflesecurity/trufflehog` action with `--only-verified --fail`, which
-  is the enforced gate; the local hook is a convenience layer.
+  `trufflesecurity/trufflehog` action, pinned to a release tag, with
+  `--only-verified`. This is the enforced gate; the local hook is a
+  convenience layer.
 
 This supersedes the `gitleaks`-specific portion of
 [0004](0004-best-effort-security-cli-wrappers.md). The best-effort wrapper

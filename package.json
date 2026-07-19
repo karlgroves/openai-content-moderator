@@ -22,7 +22,7 @@
     "security:check": "npm audit --audit-level=high",
     "security:osv": "scripts/maybe-run.sh osv-scanner 'brew install osv-scanner' --lockfile=package-lock.json",
     "security:semgrep": "scripts/maybe-run.sh semgrep 'brew install semgrep (or pip install semgrep)' --config=p/javascript --config=p/nodejsscan --config=p/owasp-top-ten --error --metrics=off",
-    "security:secrets": "scripts/maybe-run.sh trufflehog 'brew install trufflehog' git file://. --since-commit HEAD --only-verified --fail --no-update",
+    "security:secrets": "scripts/maybe-run.sh trufflehog 'brew install trufflehog' git file://. --only-verified --fail --no-update",
     "security:licenses": "license-checker-rseidelsohn --production --onlyAllow 'MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;Unlicense;BlueOak-1.0.0' --excludePrivatePackages --summary",
     "security:all": "run-s security:check security:osv security:semgrep security:secrets security:licenses",
     "deploy": "serverless deploy",

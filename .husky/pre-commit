@@ -6,9 +6,21 @@ LINT_STATUS=$?
 # against live services and (with --only-verified) fails only on confirmed
 # secrets, so false positives don't block commits. Skips with a hint if the
 # binary is not installed.
+#
+# Note on the scan mode: `trufflehog git file://. --since-commit HEAD` scans
+# commits *after* HEAD, which in a pre-commit hook is nothing at all — the
+# changes under review are staged, not yet committed (verified: 0 chunks, 0
+# bytes). Scan the staged paths on disk instead. This reads working-tree
+# contents rather than the staged blobs, which is close enough for a
+# best-effort local gate; CI's secret-scan job is the enforced backstop.
 SCAN_STATUS=0
 if command -v trufflehog >/dev/null 2>&1; then
-  trufflehog git file://. --since-commit HEAD --only-verified --fail --no-update || SCAN_STATUS=$?
+  STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+  if [ -n "$STAGED" ]; then
+    printf '%s\n' "$STAGED" | tr '\n' '\0' |
+      xargs -0 trufflehog filesystem --only-verified --fail --no-update ||
+      SCAN_STATUS=$?
+  fi
 else
   echo "[hint] trufflehog not installed — skipping secret scan. Install: brew install trufflehog"
 fi
