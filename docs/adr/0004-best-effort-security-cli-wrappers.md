@@ -4,6 +4,11 @@
 - **Date**: 2026-04-23
 - **Deciders**: @karlgroves
 
+> **Note**: the choice of `gitleaks` for secret scanning is superseded by
+> [0006](0006-trufflehog-for-secret-scanning.md), which adopts
+> `trufflehog`. The best-effort wrapper decision below still stands and
+> now also covers `trufflehog`.
+
 ## Context
 
 Phase 2 of issue #30 added npm scripts for `osv-scanner`, `semgrep`,

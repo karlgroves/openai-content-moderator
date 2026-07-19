@@ -1,14 +1,33 @@
 npx lint-staged
 LINT_STATUS=$?
 
-# Gitleaks: best-effort secret scanning. Install via `brew install gitleaks`
-# (or a release binary) to enable. Hook passes silently if not installed.
-if command -v gitleaks >/dev/null 2>&1; then
-  gitleaks protect --staged --no-banner
+# TruffleHog: best-effort secret scanning. Install via `brew install trufflehog`
+# to enable. Unlike a regex scanner, trufflehog verifies detected credentials
+# against live services and (with --only-verified) fails only on confirmed
+# secrets, so false positives don't block commits. Skips with a hint if the
+# binary is not installed.
+#
+# Note on the scan mode: `trufflehog git file://. --since-commit HEAD` scans
+# commits *after* HEAD, which in a pre-commit hook is nothing at all — the
+# changes under review are staged, not yet committed (verified: 0 chunks, 0
+# bytes). Scan the staged paths on disk instead. This reads working-tree
+# contents rather than the staged blobs, which is close enough for a
+# best-effort local gate; CI's secret-scan job is the enforced backstop.
+SCAN_STATUS=0
+if command -v trufflehog >/dev/null 2>&1; then
+  STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+  if [ -n "$STAGED" ]; then
+    printf '%s\n' "$STAGED" | tr '\n' '\0' |
+      xargs -0 trufflehog filesystem --only-verified --fail --no-update ||
+      SCAN_STATUS=$?
+  fi
 else
-  echo "[hint] gitleaks not installed — skipping secret scan. Install: brew install gitleaks"
+  echo "[hint] trufflehog not installed — skipping secret scan. Install: brew install trufflehog"
 fi
 
-# Preserve lint-staged's exit status: the gitleaks if/else above both exit 0,
-# which would otherwise mask ESLint/Prettier failures and let a bad commit pass.
-exit $LINT_STATUS
+# Block the commit if either gate failed. lint-staged is checked explicitly so
+# its exit status is never masked by the secret scan (and vice versa).
+if [ "$LINT_STATUS" -ne 0 ]; then
+  exit "$LINT_STATUS"
+fi
+exit "$SCAN_STATUS"

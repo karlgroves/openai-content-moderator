@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Run a command if its binary is installed; otherwise print an install hint
 # and exit 0. Used by security:* npm scripts so missing external binaries
-# (semgrep, osv-scanner, gitleaks) don't break local dev loops.
+# (semgrep, osv-scanner, trufflehog) don't break local dev loops.
 #
 # Usage: scripts/maybe-run.sh <tool> <install-hint> [args...]
 #   <tool>         - name of the binary to invoke
