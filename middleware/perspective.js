@@ -1,7 +1,11 @@
 const config = require('../config');
 
-// Lookup table built once so we can use Map.get() for attribute config
-// instead of a computed property access on the plain config object.
+// Lookup table built once at module load so we can use Map.get() for attribute
+// config instead of a computed property access on the plain config object.
+// NOTE: because this runs once when the module is first required, a test that
+// mutates `config.googlePerspective.attributes` after import will NOT see the
+// change reflected here — reset the module registry (e.g. jest.resetModules()
+// + re-require) before asserting against a mutated config.
 const attributeConfigs = new Map(Object.entries(config.googlePerspective.attributes));
 
 // Custom error class to carry HTTP status from Perspective API
