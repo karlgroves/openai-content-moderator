@@ -192,7 +192,7 @@ missing, the corresponding script prints an install hint and exits 0.
 | --- | --- | --- |
 | [`osv-scanner`](https://github.com/google/osv-scanner) | CVEs in dependencies | `brew install osv-scanner` |
 | [`semgrep`](https://semgrep.dev/) | Static analysis (OWASP Top 10, Node.js rules) | `brew install semgrep` or `pip install semgrep` |
-| [`gitleaks`](https://github.com/gitleaks/gitleaks) | Secret scanning | `brew install gitleaks` |
+| [`trufflehog`](https://github.com/trufflesecurity/trufflehog) | Secret scanning (verifies credentials against live services) | `brew install trufflehog` |
 
 ### Step-by-Step Installation
 

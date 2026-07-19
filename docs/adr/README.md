@@ -20,6 +20,7 @@ We use a compact [MADR](https://adr.github.io/madr/)-style template. See
 | [0003](0003-plain-javascript-not-typescript.md) | Plain JavaScript, not TypeScript | Accepted |
 | [0004](0004-best-effort-security-cli-wrappers.md) | Best-effort wrappers for external security CLIs | Accepted |
 | [0005](0005-new-eslint-rules-start-at-warn.md) | New ESLint rules start at `warn` level | Accepted |
+| [0006](0006-trufflehog-for-secret-scanning.md) | TruffleHog for secret scanning (replacing gitleaks) | Accepted |
 
 ## Creating a new ADR
 
@@ -30,3 +31,16 @@ We use a compact [MADR](https://adr.github.io/madr/)-style template. See
 4. Open a PR.
 
 Status values: `Proposed`, `Accepted`, `Deprecated`, `Superseded by <id>`.
+
+## Status convention
+
+An ADR is authored as `Proposed` while the decision is still open for
+debate. Once the author and deciders have settled it, the status is set
+to `Accepted` in the same PR that introduces the record — so an ADR may
+arrive at review already `Accepted` when the PR is documenting a
+decision that has been made rather than soliciting one. In other words,
+an ADR on
+`main`/`develop` reflects a ratified decision, so `Accepted` is the
+expected steady state for merged records. Use `Deprecated` or
+`Superseded by <id>` when a later decision overrides it; never edit a
+merged ADR's decision in place.

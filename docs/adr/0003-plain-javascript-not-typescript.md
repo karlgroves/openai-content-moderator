@@ -11,10 +11,11 @@ Issue #30 devotes significant space to a TypeScript setup: strict
 `strict-type-checked`, TSDoc-enforced documentation, and a build step
 via `tsup`/`tsc`.
 
-This project is a small Express middleware API (under 400 lines of
+This project is a small Express middleware API (roughly 440 lines of
 application code across `index.js`, four middleware files, and one
-route file). It runs as a Node.js process and deploys to AWS Lambda via
-Serverless Framework. There is no frontend.
+route file — about 490 including `config/index.js`). It runs as a
+Node.js process and deploys to AWS Lambda via Serverless Framework.
+There is no frontend.
 
 ## Decision
 

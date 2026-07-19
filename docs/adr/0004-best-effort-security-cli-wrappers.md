@@ -4,10 +4,15 @@
 - **Date**: 2026-04-23
 - **Deciders**: @karlgroves
 
+> **Note**: the choice of `gitleaks` for secret scanning is superseded by
+> [0006](0006-trufflehog-for-secret-scanning.md), which adopts
+> `trufflehog`. The best-effort wrapper decision below still stands and
+> now also covers `trufflehog`.
+
 ## Context
 
 Phase 2 of issue #30 added npm scripts for `osv-scanner`, `semgrep`,
-and `gitleaks`. These are external binaries (Rust, Python, Go) not
+and `gitleaks`. These are external binaries (Go, Python) not
 installable via npm. A new contributor running `npm install` followed
 by any of the `security:*` scripts would hit an immediate "command not
 found" failure unless they had installed each tool first.
