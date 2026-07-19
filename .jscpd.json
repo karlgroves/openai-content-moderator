@@ -9,7 +9,8 @@
     "**/*.min.js",
     "**/*.min.css",
     "**/package-lock.json",
-    "**/yarn.lock"
+    "**/yarn.lock",
+    "**/*.postman_collection.json"
   ],
   "gitignore": true,
   "minLines": 5,

@@ -22,7 +22,7 @@ changes, we write a new ADR that supersedes the old one rather than
 editing history.
 
 Scope: decisions about tooling, architecture, process, and
-dependencies. *Not* bug fixes, day-to-day implementation, or code style.
+dependencies. _Not_ bug fixes, day-to-day implementation, or code style.
 
 ## Consequences
 

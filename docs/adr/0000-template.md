@@ -8,7 +8,7 @@
 
 What is the issue we're facing? What constraints apply (technical,
 organizational, legal)? Keep this section factual; save opinions for
-*Decision*.
+_Decision_.
 
 ## Decision
 

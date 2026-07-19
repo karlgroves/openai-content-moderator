@@ -78,7 +78,10 @@ export default [
       'unicorn/prefer-module': 'off',
       'unicorn/prefer-top-level-await': 'off',
 
-      'no-secrets/no-secrets': ['error', { tolerance: 4.5, ignoreContent: ['https?://', 'data:image/'] }],
+      'no-secrets/no-secrets': [
+        'error',
+        { tolerance: 4.5, ignoreContent: ['https?://', 'data:image/'] },
+      ],
 
       'jsdoc/check-tag-names': 'error',
       'jsdoc/check-alignment': 'error',

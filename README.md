@@ -188,11 +188,11 @@ Legacy endpoint maintained for backward compatibility. Automatically redirects t
 The `security:*` npm scripts below use external binaries. If a binary is
 missing, the corresponding script prints an install hint and exits 0.
 
-| Tool | Purpose | Install |
-| --- | --- | --- |
-| [`osv-scanner`](https://github.com/google/osv-scanner) | CVEs in dependencies | `brew install osv-scanner` |
-| [`semgrep`](https://semgrep.dev/) | Static analysis (OWASP Top 10, Node.js rules) | `brew install semgrep` or `pip install semgrep` |
-| [`trufflehog`](https://github.com/trufflesecurity/trufflehog) | Secret scanning (verifies credentials against live services) | `brew install trufflehog` |
+| Tool                                                          | Purpose                                                      | Install                                         |
+| ------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------- |
+| [`osv-scanner`](https://github.com/google/osv-scanner)        | CVEs in dependencies                                         | `brew install osv-scanner`                      |
+| [`semgrep`](https://semgrep.dev/)                             | Static analysis (OWASP Top 10, Node.js rules)                | `brew install semgrep` or `pip install semgrep` |
+| [`trufflehog`](https://github.com/trufflesecurity/trufflehog) | Secret scanning (verifies credentials against live services) | `brew install trufflehog`                       |
 
 ### Step-by-Step Installation
 
