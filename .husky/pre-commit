@@ -1,4 +1,5 @@
 npx lint-staged
+LINT_STATUS=$?
 
 # Gitleaks: best-effort secret scanning. Install via `brew install gitleaks`
 # (or a release binary) to enable. Hook passes silently if not installed.
@@ -7,3 +8,7 @@ if command -v gitleaks >/dev/null 2>&1; then
 else
   echo "[hint] gitleaks not installed — skipping secret scan. Install: brew install gitleaks"
 fi
+
+# Preserve lint-staged's exit status: the gitleaks if/else above both exit 0,
+# which would otherwise mask ESLint/Prettier failures and let a bad commit pass.
+exit $LINT_STATUS
