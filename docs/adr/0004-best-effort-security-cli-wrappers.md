@@ -44,7 +44,7 @@ The pre-commit hook already uses the same best-effort pattern for
 - CI jobs that need a hard gate must explicitly install the binaries
   before running the scripts. Best-effort behavior is a local-dev
   convenience, not a substitute for enforced CI.
-- If a developer *thinks* they are running a security scan but the
+- If a developer _thinks_ they are running a security scan but the
   binary is silently missing, they get the install hint — not a silent
   pass. The hint is easy to miss in long output; documentation
   (README + this ADR) has to carry the load.
