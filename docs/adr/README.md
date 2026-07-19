@@ -30,3 +30,13 @@ We use a compact [MADR](https://adr.github.io/madr/)-style template. See
 4. Open a PR.
 
 Status values: `Proposed`, `Accepted`, `Deprecated`, `Superseded by <id>`.
+
+## Status convention
+
+An ADR is authored as `Proposed` while it lives on a feature branch and
+is under review. It is flipped to `Accepted` in the same PR once the
+decision is ratified and merged to `develop`. In other words, an ADR on
+`main`/`develop` reflects a ratified decision, so `Accepted` is the
+expected steady state for merged records. Use `Deprecated` or
+`Superseded by <id>` when a later decision overrides it; never edit a
+merged ADR's decision in place.
