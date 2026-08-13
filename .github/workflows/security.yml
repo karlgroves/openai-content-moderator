@@ -7,9 +7,18 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+# No `schedule:` trigger, by policy (see CLAUDE.md). Every check below runs on
+# the pull request that introduces the problem, where it is attributable and
+# blocking. Nothing here may be gated on `github.event_name == 'schedule'`.
+
 permissions:
   contents: read
-  security-events: write
+
+env:
+  # Pinned to the AWS Lambda runtime this service deploys onto (serverless.yml:
+  # provider.runtime = nodejs20.x). Do not use `lts/*` here: it drifts ahead of
+  # the deploy target and lets CI go green on a Node that production never runs.
+  NODE_VERSION: '20.x'
 
 jobs:
   # Secret scanning on every push/PR — fails the build on verified secrets
@@ -31,7 +40,13 @@ jobs:
           # base/head from the event type, so only the filter is needed here.
           extra_args: --only-verified
 
-  # Quick scan on every push/PR
+  # Dependency vulnerabilities.
+  #
+  # The gate is production-only and fail-closed: what ships to Lambda is
+  # `dependencies`, and a high/critical advisory there blocks the PR. The
+  # full-tree audit (which includes build-only tooling such as the Serverless
+  # CLI) is kept as an artifact for triage but does not block, because a
+  # vulnerability in a dev-time CLI is not an exposure of the deployed service.
   npm-audit:
     name: NPM Audit
     runs-on: ubuntu-latest
@@ -41,27 +56,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run npm audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
+      # Fail-closed. No `continue-on-error`, no `|| true`: if this step cannot
+      # fail the build it is not a gate, it is a log line.
+      - name: Audit production dependencies (blocking)
+        run: npm audit --omit=dev --audit-level=high
 
-      - name: Run npm audit (JSON output)
+      - name: Audit full dependency tree (report only)
         run: npm audit --json > npm-audit-results.json || true
 
       - name: Upload audit results
         uses: actions/upload-artifact@v6
+        if: always()
         with:
           name: npm-audit-results
           path: npm-audit-results.json
           retention-days: 30
 
-  # CodeQL Analysis (SAST)
+  # CodeQL Analysis (SAST).
+  #
+  # `upload: never` — this repository does not use GitHub Advanced Security /
+  # Code Scanning, so there is nowhere for the SARIF to land. Instead the SARIF
+  # is gated in-workflow (below) and kept as a build artifact.
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
@@ -78,80 +99,52 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: '/language:javascript-typescript'
+          output: codeql-sarif
+          upload: never
 
-  # OWASP Dependency Check (comprehensive - weekly only)
-  owasp-dependency-check:
-    name: OWASP Dependency Check
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v6
+      - name: Gate on CodeQL findings
+        run: node scripts/check-sarif.js codeql-sarif
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: ${{ github.repository }}
-          path: '.'
-          format: 'HTML,JSON,SARIF'
-          args: >
-            --enableExperimental
-            --nodeAuditAnalyzer
-            --nodePackageSkipDevDependencies false
-
-      - name: Upload OWASP results
+      - name: Upload CodeQL SARIF
         uses: actions/upload-artifact@v6
-        with:
-          name: owasp-dependency-check-report
-          path: reports/
-          retention-days: 90
-
-      - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: reports/dependency-check-report.sarif
         if: always()
+        with:
+          name: codeql-sarif
+          path: codeql-sarif/
+          retention-days: 30
 
-  # License compliance check
+  # License compliance.
+  #
+  # Runs the repository's own `security:licenses` script so the allowlist has a
+  # single definition (package.json) instead of drifting between a local script
+  # and a hand-maintained deny-list in CI. The previous version of this job ran
+  # `license-checker --failOn ... || echo "Review licenses above"`, which could
+  # not fail the build under any circumstances.
   license-check:
     name: License Compliance
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Install license-checker
-        run: npm install -g license-checker
+      - name: Check production licenses against the allowlist (blocking)
+        run: npm run security:licenses
 
-      - name: Check licenses
-        run: |
-          license-checker --json --out licenses.json
-          license-checker --summary
+  # Policy enforcement: no scheduled Actions, no Dependabot, no dead schedule
+  # gates. This is the check that keeps issue #53 from silently regressing.
+  no-scheduled-actions:
+    name: No Scheduled Actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
-      - name: Check for problematic licenses
-        run: |
-          license-checker --failOn 'GPL;AGPL;UNKNOWN' || echo "Review licenses above"
-
-      - name: Upload license report
-        uses: actions/upload-artifact@v6
-        with:
-          name: license-report
-          path: licenses.json
-          retention-days: 90
+      - name: Assert no cron schedules or dependabot config
+        run: bash scripts/check-no-scheduled-actions.sh
