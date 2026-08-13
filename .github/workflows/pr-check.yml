@@ -13,76 +13,55 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
+      # Structural validation only. Lint, tests, build and the security gates
+      # live in ci.yml and security.yml; this job used to re-run them with
+      # `continue-on-error: true` on every step, which meant it reported success
+      # no matter what happened and duplicated the Actions minutes of the real
+      # jobs. That job has been removed rather than re-armed.
       - name: Validate workflow syntax
         run: |
-          echo "Validating GitHub Actions workflow files..."
-          errors=0
+          python3 - <<'PY'
+          import glob
+          import sys
 
-          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
-            [ -f "$f" ] || continue
-            echo "Checking $f..."
+          import yaml
 
-            # Basic YAML syntax check
-            if ! python3 -c "import yaml; yaml.safe_load(open('$f'))" 2>/dev/null; then
-              echo "ERROR: Invalid YAML in $f"
-              errors=$((errors + 1))
-            fi
+          errors = []
+          files = sorted(glob.glob('.github/workflows/*.yml') + glob.glob('.github/workflows/*.yaml'))
 
-            # Check for required 'on' and 'jobs' keys
-            if ! grep -q '^on:' "$f" && ! grep -q "^'on':" "$f" && ! grep -q '^"on":' "$f"; then
-              echo "WARNING: Missing 'on' trigger in $f"
-            fi
+          if not files:
+              print('No workflow files found.')
+              sys.exit(0)
 
-            if ! grep -q '^jobs:' "$f"; then
-              echo "WARNING: Missing 'jobs' section in $f"
-            fi
-          done
+          for path in files:
+              print(f'Checking {path}...')
+              try:
+                  with open(path, encoding='utf-8') as handle:
+                      doc = yaml.safe_load(handle)
+              except yaml.YAMLError as exc:
+                  errors.append(f'{path}: invalid YAML: {exc}')
+                  continue
 
-          if [ $errors -gt 0 ]; then
-            echo "Found $errors workflow file(s) with errors"
-            exit 1
-          fi
+              if not isinstance(doc, dict):
+                  errors.append(f'{path}: top level is not a mapping')
+                  continue
 
-          echo "All workflow files are valid"
+              # YAML 1.1 resolves a bare `on:` key to the boolean True, so the
+              # trigger block can appear under either key depending on quoting.
+              if 'on' not in doc and True not in doc:
+                  errors.append(f'{path}: missing "on" trigger')
 
-  ci-check:
-    name: CI Readiness Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+              if 'jobs' not in doc:
+                  errors.append(f'{path}: missing "jobs" section')
 
-      - name: Detect project type
-        id: detect
-        run: |
-          if [ -f "package.json" ]; then
-            echo "type=node" >> $GITHUB_OUTPUT
-          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
-            echo "type=python" >> $GITHUB_OUTPUT
-          else
-            echo "type=other" >> $GITHUB_OUTPUT
-          fi
+          if errors:
+              print()
+              for error in errors:
+                  print(f'ERROR: {error}')
+              print(f'\nFound {len(errors)} workflow problem(s)')
+              sys.exit(1)
 
-      - name: Setup Node.js
-        if: steps.detect.outputs.type == 'node'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-
-      - name: Install dependencies
-        if: steps.detect.outputs.type == 'node'
-        run: npm ci --ignore-scripts
-        continue-on-error: true
-
-      - name: Run lint check
-        if: steps.detect.outputs.type == 'node'
-        run: npm run lint --if-present
-        continue-on-error: true
-
-      - name: Run tests
-        if: steps.detect.outputs.type == 'node'
-        run: npm test --if-present
-        continue-on-error: true
+          print('\nAll workflow files are valid')
+          PY

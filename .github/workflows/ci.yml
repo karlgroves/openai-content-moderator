@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint & Format
@@ -20,7 +23,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
+          # Pinned to the deploy target (serverless.yml runtime: nodejs20.x)
+          # rather than `lts/*`, which drifts onto a newer major than the one
+          # production actually runs.
+          node-version: '20.x'
           cache: 'npm'
 
       - name: Install dependencies
@@ -32,13 +38,13 @@ jobs:
       - name: Check Prettier formatting
         run: npm run format:check
 
+      # No `continue-on-error` below: both of these pass today, so leaving them
+      # advisory only meant a future regression would land unnoticed.
       - name: Lint Markdown
         run: npm run lint:md
-        continue-on-error: true
 
       - name: Check for code duplication (jscpd)
         run: npm run lint:cpd:ci
-        continue-on-error: true
 
       - name: Upload duplication report
         uses: actions/upload-artifact@v6
@@ -53,7 +59,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        # 20.x is the deploy target (AWS Lambda nodejs20.x); 22.x is the next
+        # LTS, kept as an early warning for the eventual runtime bump.
+        #
+        # Node 18 was removed: package.json declares `engines.node >= 20.5.0`
+        # and .npmrc sets `engine-strict=true`, so `npm ci` cannot succeed on
+        # 18 — that matrix leg could only ever fail.
+        node-version: [20.x, 22.x]
     steps:
       - uses: actions/checkout@v6
 

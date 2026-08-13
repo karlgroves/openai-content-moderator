@@ -104,6 +104,20 @@ export default [
     },
   },
   {
+    // CI helper scripts. These are command-line entry points, not application
+    // code: writing to stdout/stderr is their output channel, a non-zero
+    // process exit is how they gate a build, and taking a filesystem path as
+    // an argument is their entire purpose — so the non-literal-fs-filename
+    // detector fires on every call by construction. The rules stay on
+    // everywhere else, including all runtime code under middleware/ and routes/.
+    files: ['scripts/**/*.js'],
+    rules: {
+      'no-console': 'off',
+      'n/no-process-exit': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+    },
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',
