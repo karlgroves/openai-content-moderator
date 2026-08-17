@@ -1,6 +1,7 @@
 {
   "name": "openai-content-moderator",
   "version": "1.0.0",
+  "private": true,
   "description": "Middleware-based REST API for content moderation using OpenAI",
   "main": "index.js",
   "scripts": {
