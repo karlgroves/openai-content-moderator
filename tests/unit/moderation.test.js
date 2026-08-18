@@ -1,6 +1,7 @@
 const nock = require('nock');
 const { moderateContent } = require('../../middleware/moderation');
 const {
+  EXPECTED_ATTEMPTS,
   mockOpenAISuccess,
   mockOpenAIFlagged,
   mockOpenAIError,
@@ -179,6 +180,54 @@ describe('Moderation Middleware - Core Functionality', () => {
         error: 'Failed to process moderation request',
       });
       expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  // Regression tests for #57.
+  describe('Upstream resilience', () => {
+    it('bounds the client budget well inside the 30s Lambda timeout', () => {
+      const config = require('../../config');
+      const attempts = config.openai.maxRetries + 1;
+      const worstCaseMs = config.openai.timeoutMs * attempts + config.googlePerspective.timeoutMs;
+
+      // serverless.yml sets `timeout: 30`. The SDK default -- a 10 minute
+      // timeout with 2 retries -- is 20x the function's entire lifetime.
+      expect(config.openai.timeoutMs).toBeLessThanOrEqual(10000);
+      expect(worstCaseMs).toBeLessThan(30000);
+    });
+
+    it('reports an upstream connection failure as 503, not a generic 500', async () => {
+      req.body = { text: 'Test text' };
+
+      const scope = nock('https://api.openai.com')
+        .post('/v1/moderations')
+        .times(EXPECTED_ATTEMPTS)
+        .replyWithError({ code: 'ECONNRESET', message: 'socket hang up' });
+
+      await moderateContent(req, res, next);
+
+      expect(scope.isDone()).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(503);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'OpenAI service is temporarily unavailable. Please try again later.',
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('logs an allowlisted error shape, not the raw error object', async () => {
+      req.body = { text: 'Test text' };
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      mockOpenAIError(429, { error: { message: 'Rate limit exceeded' } });
+      await moderateContent(req, res, next);
+
+      const [label, logged] = console.error.mock.calls[0];
+      expect(label).toBe('OpenAI Moderation API Error:');
+      expect(Object.keys(logged).sort()).toEqual(
+        ['code', 'message', 'name', 'request_id', 'status', 'type'].sort()
+      );
+      expect(logged).not.toHaveProperty('headers');
+      console.error.mockRestore();
     });
   });
 });

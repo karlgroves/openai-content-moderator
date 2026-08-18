@@ -27,7 +27,27 @@ describe('Error Handler Middleware', () => {
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
       });
-      expect(console.error).toHaveBeenCalledWith('Error:', error);
+      expect(console.error).toHaveBeenCalledWith('Error:', {
+        name: 'Error',
+        message: 'Test error',
+        statusCode: undefined,
+        code: undefined,
+        stack: error.stack,
+      });
+    });
+
+    // Regression test for #56: the raw error object may carry an unbounded
+    // `cause` chain from a third-party client, so only an allowlisted shape is
+    // logged.
+    it('logs an allowlisted shape rather than the raw error object', () => {
+      const error = new Error('Upstream failed');
+      error.cause = { authorization: 'Bearer super-secret-token' };
+
+      errorHandler(error, req, res, next);
+
+      const logged = console.error.mock.calls[0][1];
+      expect(logged).not.toHaveProperty('cause');
+      expect(JSON.stringify(logged)).not.toContain('super-secret-token');
     });
 
     it('should use error status code when provided', () => {
