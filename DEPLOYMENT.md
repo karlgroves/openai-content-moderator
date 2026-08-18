@@ -6,7 +6,7 @@ This guide covers deploying the OpenAI Content Moderator API to AWS Lambda using
 
 1. AWS Account with appropriate permissions
 2. AWS CLI configured with credentials
-3. Node.js 18.x or later
+3. Node.js 20.5.0 or later (see `engines` in `package.json`)
 4. Serverless Framework CLI (installed as dev dependency)
 
 ## Setup
@@ -58,18 +58,36 @@ This starts the serverless-offline plugin on port 3000.
 
 The `serverless.yml` file contains all deployment configuration:
 
-- **Runtime**: Node.js 18.x
+- **Runtime**: Node.js 20.x
 - **Memory**: 512 MB
 - **Timeout**: 30 seconds
 - **API Gateway**: Configured with CORS and compression
 
 ### Environment Variables
 
-The following environment variables are configured:
+`serverless.yml` passes the following through to the function:
 
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
-- `NODE_ENV`: Set based on deployment stage
-- `CORS_ORIGIN`: CORS configuration (defaults to '\*')
+| variable                     | required           | default                  | notes                                                                                      |
+| ---------------------------- | ------------------ | ------------------------ | ------------------------------------------------------------------------------------------ |
+| `OPENAI_API_KEY`             | yes                | none                     | Deploy fails if unset.                                                                     |
+| `OPENAI_MODEL`               | no                 | `omni-moderation-latest` |                                                                                            |
+| `GOOGLE_PERSPECTIVE_API_KEY` | no                 | empty                    | Only read when Perspective is enabled.                                                     |
+| `PERSPECTIVE_API_ENABLED`    | no                 | `false`                  | Must be the exact string `true` to enable.                                                 |
+| `API_SECRET_KEY`             | **yes for `prod`** | empty                    | See below.                                                                                 |
+| `NODE_ENV`                   | derived            | from stage               | `dev` maps to `development`, `prod` to `production`; any other stage maps to `production`. |
+| `CORS_ORIGIN`                | no                 | empty                    | Comma-separated exact origins.                                                             |
+
+**`CORS_ORIGIN` has no `'*'` default.** Credentials are enabled, so the app
+rejects a wildcard allowlist at start-up. The previous `'*'` default meant any
+deploy that did not set `CORS_ORIGIN` explicitly produced a function that threw
+on its first invocation. Empty means "no browser origins allowed", which is a
+valid and safe configuration; set an explicit list to permit browser clients.
+
+**`API_SECRET_KEY` is mandatory on the `prod` stage.** When `NODE_ENV` resolves
+to `production` and the key is unset, the app refuses to start rather than
+silently serving unauthenticated traffic — every request costs money at a
+third-party API. Development and test keep the permissive default so local work
+needs no setup.
 
 ## API Endpoints
 
@@ -105,4 +123,4 @@ npm run remove
 2. Store `OPENAI_API_KEY` in AWS Systems Manager Parameter Store or Secrets Manager
 3. Enable API Gateway request throttling
 4. Configure custom domain with SSL certificate
-5. Implement API key authentication for production use
+5. Set `API_SECRET_KEY` for every deployed stage; production refuses to start without it

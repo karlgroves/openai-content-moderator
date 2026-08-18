@@ -553,8 +553,9 @@ openai-content-moderator/
 │   ├── integration/    # API endpoint tests
 │   └── unit/          # Component tests
 ├── docs/               # Documentation
-├── index.js           # Main application entry
-├── lambda.js          # AWS Lambda handler
+├── app.js             # Builds and exports the configured Express app
+├── index.js           # Local/server entry: requires ./app and listens
+├── lambda.js          # AWS Lambda handler: wraps ./app with serverless-http
 └── serverless.yml     # Serverless Framework config
 ```
 
