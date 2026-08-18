@@ -1,5 +1,12 @@
 const nock = require('nock');
 const { mockOpenAIResponse, mockFlaggedResponse } = require('../fixtures/mockData');
+const config = require('../../config');
+
+// The OpenAI client retries per config.openai.maxRetries, so a failing call is
+// attempted maxRetries + 1 times. Deriving it here keeps `scope.isDone()` a
+// genuine assertion that the client made exactly the configured number of
+// attempts, instead of a hardcoded 3 that silently rots when the budget changes.
+const EXPECTED_ATTEMPTS = config.openai.maxRetries + 1;
 
 // Helper to mock OpenAI API calls
 const mockOpenAISuccess = (text = 'test text', response = mockOpenAIResponse) => {
@@ -12,7 +19,7 @@ const mockOpenAIError = (
 ) => {
   return nock('https://api.openai.com')
     .post('/v1/moderations')
-    .times(3) // Handle retries
+    .times(EXPECTED_ATTEMPTS)
     .reply(statusCode, errorBody);
 };
 
@@ -28,7 +35,7 @@ const mockOpenAISpecificError = (statusCode, message) => {
 
   return nock('https://api.openai.com')
     .post('/v1/moderations')
-    .times(3) // Handle retries
+    .times(EXPECTED_ATTEMPTS)
     .reply(statusCode, errorResponse);
 };
 
@@ -63,6 +70,7 @@ const createExpectedMetadata = (textLength, model = 'omni-moderation-latest') =>
 const waitFor = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = {
+  EXPECTED_ATTEMPTS,
   mockOpenAISuccess,
   mockOpenAIError,
   mockOpenAISpecificError,

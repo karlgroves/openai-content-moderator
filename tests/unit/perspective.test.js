@@ -9,6 +9,7 @@ jest.mock('../../config', () => ({
   googlePerspective: {
     enabled: true,
     apiKey: 'test-api-key',
+    timeoutMs: 5000,
     attributes: {
       TOXICITY: { scoreThreshold: 0.7 },
       SEVERE_TOXICITY: { scoreThreshold: 0.7 },
@@ -19,6 +20,16 @@ jest.mock('../../config', () => ({
     },
   },
 }));
+
+const ENDPOINT = 'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze';
+
+// Build a Perspective error response with the given HTTP status.
+const mockPerspectiveStatus = (status, message) =>
+  fetch.mockResolvedValueOnce({
+    ok: false,
+    status,
+    json: () => Promise.resolve({ error: { message } }),
+  });
 
 describe('Perspective API Middleware', () => {
   let req, res, next;
@@ -37,6 +48,9 @@ describe('Perspective API Middleware', () => {
 
     // Reset fetch mock
     fetch.mockReset();
+
+    config.googlePerspective.enabled = true;
+    config.googlePerspective.apiKey = 'test-api-key';
 
     // Mock console methods
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -60,7 +74,6 @@ describe('Perspective API Middleware', () => {
     });
 
     it('should call next() when Perspective API key is missing', async () => {
-      config.googlePerspective.enabled = true;
       config.googlePerspective.apiKey = null;
 
       await moderateWithPerspective(req, res, next);
@@ -71,9 +84,6 @@ describe('Perspective API Middleware', () => {
     });
 
     it('should successfully process clean content', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
       const mockResponse = {
         attributeScores: {
           TOXICITY: {
@@ -105,11 +115,12 @@ describe('Perspective API Middleware', () => {
       await moderateWithPerspective(req, res, next);
 
       expect(fetch).toHaveBeenCalledWith(
-        'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=test-api-key',
+        ENDPOINT,
         expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': 'test-api-key',
           },
           body: JSON.stringify({
             comment: { text: 'This is a test message' },
@@ -157,9 +168,6 @@ describe('Perspective API Middleware', () => {
     });
 
     it('should flag toxic content', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
       const mockResponse = {
         attributeScores: {
           TOXICITY: {
@@ -184,127 +192,10 @@ describe('Perspective API Middleware', () => {
       expect(next).toHaveBeenCalled();
     });
 
-    it('should handle 400 API errors', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: () =>
-          Promise.resolve({
-            error: { message: 'Bad request' },
-          }),
-      });
-
-      await moderateWithPerspective(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Invalid request format for Perspective API',
-      });
-      expect(next).not.toHaveBeenCalled();
-    });
-
-    it('should handle 401 API errors', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: () =>
-          Promise.resolve({
-            error: { message: 'Unauthorized' },
-          }),
-      });
-
-      await moderateWithPerspective(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Invalid API key. Please check your Google Perspective API key configuration.',
-      });
-      expect(next).not.toHaveBeenCalled();
-    });
-
-    it('should handle 429 rate limit errors', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 429,
-        json: () =>
-          Promise.resolve({
-            error: { message: 'Rate limit exceeded' },
-          }),
-      });
-
-      await moderateWithPerspective(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(429);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Rate limit exceeded for Perspective API. Please try again later.',
-      });
-      expect(next).not.toHaveBeenCalled();
-    });
-
-    it('should handle 503 service unavailable errors', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 503,
-        json: () =>
-          Promise.resolve({
-            error: { message: 'Service unavailable' },
-          }),
-      });
-
-      await moderateWithPerspective(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(503);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Perspective API service is temporarily unavailable. Please try again later.',
-      });
-      expect(next).not.toHaveBeenCalled();
-    });
-
-    it('should continue without Perspective API on other errors', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      fetch.mockRejectedValueOnce(new Error('Network error'));
-
-      await moderateWithPerspective(req, res, next);
-
-      expect(console.warn).toHaveBeenCalledWith(
-        'Perspective API failed, continuing without it:',
-        'Network error'
-      );
-
-      expect(req.perspectiveResults).toBe(null);
-      expect(req.perspectiveMetadata).toEqual({
-        timestamp: expect.any(String),
-        textLength: 22,
-        service: 'google-perspective',
-        error: 'Service unavailable',
-      });
-
-      expect(next).toHaveBeenCalled();
-    });
-
     it('should handle empty attributeScores response', async () => {
-      config.googlePerspective.enabled = true;
-      config.googlePerspective.apiKey = 'test-api-key';
-
-      const mockResponse = {};
-
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockResponse),
+        json: () => Promise.resolve({}),
       });
 
       await moderateWithPerspective(req, res, next);
@@ -316,6 +207,121 @@ describe('Perspective API Middleware', () => {
         category_scores: {},
       });
 
+      expect(next).toHaveBeenCalled();
+    });
+  });
+
+  // Regression tests for #56.
+  describe('credential handling', () => {
+    it('sends the API key in the x-goog-api-key header', async () => {
+      fetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+
+      await moderateWithPerspective(req, res, next);
+
+      const [, options] = fetch.mock.calls[0];
+      expect(options.headers['x-goog-api-key']).toBe('test-api-key');
+    });
+
+    it('never puts the API key in the request URL', async () => {
+      fetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+
+      await moderateWithPerspective(req, res, next);
+
+      const [url] = fetch.mock.calls[0];
+      // A secret in a URL is a secret in every access log and proxy log.
+      expect(url).toBe(ENDPOINT);
+      expect(url).not.toContain('test-api-key');
+      expect(url).not.toContain('key=');
+    });
+
+    it('logs an allowlisted error shape, not the raw error object', async () => {
+      const raw = new Error('Network error');
+      raw.cause = { secret: 'should-not-be-logged', code: 'ECONNRESET' };
+      fetch.mockRejectedValueOnce(raw);
+
+      await moderateWithPerspective(req, res, next);
+
+      expect(console.warn).toHaveBeenCalledWith('Perspective API failed, continuing without it:', {
+        name: 'Error',
+        message: 'Network error',
+        statusCode: undefined,
+        code: 'ECONNRESET',
+      });
+      const logged = JSON.stringify(console.warn.mock.calls[0][1]);
+      expect(logged).not.toContain('should-not-be-logged');
+    });
+  });
+
+  // Regression tests for #57.
+  describe('resilience', () => {
+    it('passes an abort signal so the call cannot hang', async () => {
+      fetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({}) });
+
+      await moderateWithPerspective(req, res, next);
+
+      const [, options] = fetch.mock.calls[0];
+      expect(options.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('degrades gracefully on timeout and records it in metadata', async () => {
+      const timeout = new Error('The operation was aborted due to timeout');
+      timeout.name = 'TimeoutError';
+      fetch.mockRejectedValueOnce(timeout);
+
+      await moderateWithPerspective(req, res, next);
+
+      expect(res.status).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+      expect(req.perspectiveResults).toBe(null);
+      expect(req.perspectiveMetadata).toEqual({
+        timestamp: expect.any(String),
+        textLength: 22,
+        service: 'google-perspective',
+        error: 'Timed out',
+      });
+    });
+
+    // Every one of these previously returned a terminal HTTP response, which
+    // meant an optional enrichment service could stop the primary OpenAI
+    // moderation from ever running.
+    it.each([
+      [400, 'Bad request'],
+      [401, 'Unauthorized'],
+      [403, 'Forbidden'],
+      [429, 'Rate limit exceeded'],
+      [500, 'Internal error'],
+      [502, 'Bad gateway'],
+      [503, 'Service unavailable'],
+    ])('degrades gracefully on upstream %i instead of failing the request', async (status, msg) => {
+      mockPerspectiveStatus(status, msg);
+
+      await moderateWithPerspective(req, res, next);
+
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+      expect(req.perspectiveResults).toBe(null);
+      expect(req.perspectiveMetadata).toEqual({
+        timestamp: expect.any(String),
+        textLength: 22,
+        service: 'google-perspective',
+        error: 'Service unavailable',
+        statusCode: status,
+      });
+    });
+
+    it('continues without Perspective on a network error', async () => {
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+
+      await moderateWithPerspective(req, res, next);
+
+      expect(req.perspectiveResults).toBe(null);
+      expect(req.perspectiveMetadata).toEqual({
+        timestamp: expect.any(String),
+        textLength: 22,
+        service: 'google-perspective',
+        error: 'Service unavailable',
+      });
       expect(next).toHaveBeenCalled();
     });
   });

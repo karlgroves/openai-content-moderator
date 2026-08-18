@@ -1,6 +1,15 @@
 // Global error handling middleware
 const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
+  // Log an explicit, allowlisted shape rather than the raw error object, which
+  // may carry an unbounded `cause` chain from a third-party client. The stack is
+  // kept because it is ours and is the useful part for debugging.
+  console.error('Error:', {
+    name: err?.name,
+    message: err?.message,
+    statusCode: err?.statusCode ?? err?.status,
+    code: err?.code,
+    stack: err?.stack,
+  });
 
   // Set appropriate status code
   const statusCode = err.statusCode || err.status || 500;
