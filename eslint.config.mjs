@@ -101,6 +101,12 @@ export default [
       'sonarjs/no-duplicate-string': 'off',
       'sonarjs/cognitive-complexity': 'off',
       'no-secrets/no-secrets': 'off',
+      // Tests save and restore process.env by key to exercise start-up
+      // behaviour under different configurations. The keys are literals written
+      // in the test itself, never request data, so the object-injection
+      // detector has nothing real to find here. It stays on for all runtime
+      // code under middleware/, routes/, config/ and the entry points.
+      'security/detect-object-injection': 'off',
     },
   },
   {

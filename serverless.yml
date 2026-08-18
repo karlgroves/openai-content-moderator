@@ -7,8 +7,23 @@ provider:
   region: ${opt:region, 'us-east-1'}
   environment:
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
-    NODE_ENV: ${self:provider.stage}
-    CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
+    OPENAI_MODEL: ${env:OPENAI_MODEL, 'omni-moderation-latest'}
+    GOOGLE_PERSPECTIVE_API_KEY: ${env:GOOGLE_PERSPECTIVE_API_KEY, ''}
+    PERSPECTIVE_API_ENABLED: ${env:PERSPECTIVE_API_ENABLED, 'false'}
+    # Authentication. Empty is tolerated on the dev stage; app.js refuses to
+    # start when NODE_ENV=production and this is unset, so production cannot
+    # silently serve unauthenticated traffic.
+    API_SECRET_KEY: ${env:API_SECRET_KEY, ''}
+    # NODE_ENV must be a real Node environment name, not the deploy stage:
+    # app.js and middleware/errorHandler.js both branch on 'production' /
+    # 'development', and the previous `${self:provider.stage}` produced 'prod'
+    # and 'dev', so neither branch ever fired on a deployed function.
+    NODE_ENV: ${self:custom.nodeEnv}
+    # Comma-separated exact-origin allowlist. Empty means no browser CORS.
+    # There is deliberately no '*' default: credentials are enabled, so app.js
+    # throws at startup on a wildcard, and the old '*' default guaranteed that
+    # every deploy without an explicit CORS_ORIGIN crashed on first invocation.
+    CORS_ORIGIN: ${env:CORS_ORIGIN, ''}
   apiGateway:
     minimumCompressionSize: 1024
     shouldStartNameWithService: true
@@ -32,6 +47,11 @@ plugins:
   - serverless-offline
 
 custom:
+  # Unknown stages fall back to 'production' so a new stage is strict by default.
+  nodeEnvByStage:
+    dev: development
+    prod: production
+  nodeEnv: ${self:custom.nodeEnvByStage.${self:provider.stage}, 'production'}
   serverless-offline:
     httpPort: 3000
     lambdaPort: 3001
